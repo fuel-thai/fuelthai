@@ -1,0 +1,27 @@
+{
+  "name": "FUEL::TH -- Thailand Fuel Crisis Tracker",
+  "short_name": "FUEL::TH",
+  "description": "Real-time diesel availability, fuel prices, and station finder for Thailand",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#0a0a1a",
+  "orientation": "portrait-primary",
+  "categories": ["utilities", "navigation"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

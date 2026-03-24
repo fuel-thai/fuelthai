@@ -1,0 +1,71 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "thai-fuel"
+main = "worker/worker.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+workers_dev = false
+
+routes = [
+  { pattern = "fuelthai.com", custom_domain = true },
+  { pattern = "www.fuelthai.com", custom_domain = true },
+  { pattern = "fuel.lanta.dev", custom_domain = true },
+  { pattern = "thai-fuel.preview.frst.dev", custom_domain = true }
+]
+
+[vars]
+# CRON_SECRET -- set via `wrangler secret put CRON_SECRET`
+# VAPID_PRIVATE_KEY -- set via `wrangler secret put VAPID_PRIVATE_KEY`
+VAPID_PUBLIC_KEY = "BAcG4yXhl58Hwx486unIWKyRenkijGX9W6BKNCmLLds7BIZ2bLtOUQZ8Ijkh9fZritQbho-YPEdv-xx2VVV-vZo"
+VAPID_SUBJECT = "mailto:fuel@lanta.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "fuel-th-db"
+database_id = "b2395f7a-18ff-43bd-98fd-e89d7d97b6e5"
+
+[[r2_buckets]]
+bucket_name = "fuel-th-snapshots"
+binding = "R2"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+[assets]
+directory = "dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+# ─── Staging environment ──────────────────────────────────────────
+[env.staging]
+name = "thai-fuel-staging"
+workers_dev = true
+routes = [
+  { pattern = "fuel-staging.lanta.dev", custom_domain = true }
+]
+
+[env.staging.vars]
+# CRON_SECRET -- set via `wrangler secret put CRON_SECRET -e staging`
+# VAPID_PRIVATE_KEY -- set via `wrangler secret put VAPID_PRIVATE_KEY -e staging`
+VAPID_PUBLIC_KEY = "BAcG4yXhl58Hwx486unIWKyRenkijGX9W6BKNCmLLds7BIZ2bLtOUQZ8Ijkh9fZritQbho-YPEdv-xx2VVV-vZo"
+VAPID_SUBJECT = "mailto:fuel@lanta.dev"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "fuel-th-db"
+database_id = "b2395f7a-18ff-43bd-98fd-e89d7d97b6e5"
+
+[[env.staging.r2_buckets]]
+bucket_name = "fuel-th-snapshots"
+binding = "R2"
+
+
+[env.staging.triggers]
+crons = []
+
+[env.staging.assets]
+directory = "dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]

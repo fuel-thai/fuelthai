@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#1a1a2e"/>
+  <text x="4" y="13" font-family="monospace" font-size="7" font-weight="bold" fill="#4ade80">FUEL</text>
+  <text x="4" y="22" font-family="monospace" font-size="7" font-weight="bold" fill="#facc15">::TH</text>
+  <circle cx="26" cy="8" r="3" fill="#ef4444" opacity="0.9">
+    <animate attributeName="opacity" values="0.9;0.4;0.9" dur="2s" repeatCount="indefinite"/>
+  </circle>
+</svg>

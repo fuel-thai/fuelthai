@@ -1,0 +1,23 @@
+# Security headers for all responses
+/*
+	X-Content-Type-Options: nosniff
+	X-Frame-Options: DENY
+	Referrer-Policy: strict-origin-when-cross-origin
+
+# HTML - always revalidate
+/
+	Cache-Control: public, max-age=0, must-revalidate
+
+/*.html
+	Cache-Control: public, max-age=0, must-revalidate
+
+# Fingerprinted assets in lib/ - immutable forever
+/lib/*
+	Cache-Control: public, max-age=31536000, immutable
+
+# Images and fonts - long cache
+/*.webp
+	Cache-Control: public, max-age=31536000, immutable
+
+/*.woff2
+	Cache-Control: public, max-age=31536000, immutable

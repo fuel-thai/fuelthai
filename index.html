@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>FUEL::TH -- Thailand Fuel Prices & Diesel Availability</title>
+    <meta name="description" content="Real-time Thailand fuel prices, diesel availability, and station finder. 24,548 stations from DOEB Fuel Now + PumpRadar crowdsourced reports. Built during the 2026 Iran war energy crisis." />
+
+    <!-- Thai SEO -->
+    <meta name="description" lang="th" content="ราคาน้ำมันไทยแบบเรียลไทม์ สถานะดีเซล และค้นหาสถานีบริการ 24,548 สถานีจาก DOEB Fuel Now สร้างในช่วงวิกฤตพลังงาน 2569" />
+    <meta name="keywords" content="diesel, Thailand, fuel prices, gas station, น้ำมัน, ดีเซล, ราคาน้ำมัน, สถานีน้ำมัน, วิกฤตน้ำมัน, DOEB, PumpRadar" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="FUEL::TH -- มีดีเซลใกล้คุณไหม?" />
+    <meta property="og:description" content="เช็คสถานะดีเซลแบบเรียลไทม์ ราคาน้ำมัน และค้นหาสถานีบริการ 24,548 แห่งทั่วไทย" />
+    <meta property="og:url" content="https://www.fuelthai.com" />
+    <meta property="og:site_name" content="FUEL::TH" />
+    <meta property="og:image" content="https://www.fuelthai.com/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="th_TH" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="FUEL::TH -- Thailand Fuel Crisis Tracker" />
+    <meta name="twitter:description" content="Real-time diesel availability & fuel prices for 24,548 stations across Thailand." />
+    <meta name="twitter:image" content="https://www.fuelthai.com/icon-512.png" />
+
+    <!-- LINE specific -->
+    <meta property="og:title" content="FUEL::TH -- มีดีเซลใกล้คุณไหม?" />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#0a0a1a" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FUEL::TH" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "FUEL::TH",
+      "description": "Real-time Thailand fuel prices, diesel availability, and station finder",
+      "url": "https://www.fuelthai.com",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "THB" },
+      "inLanguage": ["en", "th"],
+      "author": { "@type": "Organization", "name": "FUEL::TH", "email": "fuel@lanta.dev" }
+    }
+    </script>
+    <!-- Cloudflare Web Analytics (set VITE_CF_BEACON in .env) -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "%VITE_CF_BEACON%"}'></script>
+
+    <!-- Google Analytics (set VITE_GA_ID in .env) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_ID%"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '%VITE_GA_ID%');
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,45 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "thai-fuel"
+main = "worker/worker.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+workers_dev = false
+
+routes = [
+  { pattern = "your-domain.com", custom_domain = true },
+  { pattern = "www.your-domain.com", custom_domain = true }
+]
+
+[vars]
+# Secrets -- set via wrangler CLI, NOT here:
+#   wrangler secret put CRON_SECRET
+#   wrangler secret put VAPID_PRIVATE_KEY
+VAPID_PUBLIC_KEY = "your-vapid-public-key"
+VAPID_SUBJECT = "mailto:your-email@example.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "fuel-th-db"
+database_id = "your-d1-database-id"
+
+[[r2_buckets]]
+bucket_name = "fuel-th-snapshots"
+binding = "R2"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+[assets]
+directory = "dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+# ─── Staging environment (optional) ──────────────────────────────
+# [env.staging]
+# name = "thai-fuel-staging"
+# workers_dev = true
+# routes = [
+#   { pattern = "staging.your-domain.com", custom_domain = true }
+# ]
