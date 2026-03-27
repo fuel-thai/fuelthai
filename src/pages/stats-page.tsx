@@ -42,8 +42,6 @@ export default function StatsPage() {
 		fetch("/api/brand-prices").then((r) => r.ok ? r.json() : null).then(setBrands).catch(() => {});
 	}, []);
 
-	const loading = !crude && !exchange && !brands;
-
 	const crudeChartData = crude?.observations.map((o) => ({ label: o.date, value: o.price })) || [];
 	const brandsWithDiesel = brands?.brands.filter((b) => b.diesel != null) || [];
 	const brandsNoDiesel = brands?.brands.filter((b) => b.diesel == null) || [];
@@ -54,16 +52,8 @@ export default function StatsPage() {
 			<SiteHeader page="STATS" pageTh="สถิติ" subtitle={t("statsSubtitle", lang)} />
 
 			<main className="mx-auto max-w-4xl px-4 py-6 space-y-6">
-				{loading && (
-					<div className="space-y-6">
-						<SkeletonChart />
-						<SkeletonChart />
-						<SkeletonChart />
-					</div>
-				)}
-
 				{/* Brent Crude Chart */}
-				{crude && (
+				{!crude ? <SkeletonChart /> : (
 					<div className="rounded-xl border border-border bg-card p-5">
 						<div className="flex items-start justify-between mb-4">
 							<div>
@@ -102,7 +92,7 @@ export default function StatsPage() {
 				)}
 
 				{/* Exchange Rate */}
-				{exchange && (
+				{!exchange ? <SkeletonChart /> : (
 					<div className="rounded-xl border border-border bg-card p-5">
 						<div className="flex items-start justify-between">
 							<div>
@@ -123,7 +113,7 @@ export default function StatsPage() {
 				)}
 
 				{/* Diesel by Brand */}
-				{brands && brandBars.length > 0 && (
+				{!brands ? <SkeletonChart /> : brandBars.length > 0 && (
 					<div className="rounded-xl border border-border bg-card p-5">
 						<div className="mb-4">
 							<h2 className="font-mono text-sm font-bold text-foreground uppercase tracking-wider">
@@ -188,12 +178,6 @@ export default function StatsPage() {
 					</div>
 				)}
 
-				{/* No data fallback */}
-				{!crude && !exchange && !brands && !loading && (
-					<div className="rounded-lg border border-border bg-card p-8 text-center">
-						<p className="font-mono text-sm text-muted-foreground">{t("dataUnavailable", lang)}</p>
-					</div>
-				)}
 			</main>
 
 			<SiteFooter text="Market data from FRED, Frankfurter, and thai-oil-api. Built during the 2026 Iran war energy crisis." textTh="ข้อมูลตลาดจาก FRED, Frankfurter, และ thai-oil-api สร้างในช่วงวิกฤตพลังงาน 2569" />
