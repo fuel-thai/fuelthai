@@ -59,13 +59,17 @@ async function capturePriceSnapshots(env: Bindings, today: string) {
 	const thbRate = (exchangeRes as any)?.rates?.THB;
 	addMetric("frankfurter", "thb_usd", thbRate, "THB/USD");
 
-	// Brand diesel prices -- shape: response.stations.{brand}.diesel_b7.price
+	// Brand diesel prices -- thai-oil-api has fields swapped:
+	// diesel_b7 = actually premium, hi_premium_diesel/premium_diesel = actually regular B7
+	// Use the LOWER price as the real diesel B7 (regular is always cheaper than premium)
 	const brandStations = (brandRes as any)?.response?.stations;
 	if (brandStations && typeof brandStations === "object") {
 		for (const [brandKey, fuels] of Object.entries(brandStations)) {
-			const diesel = (fuels as any)?.diesel_b7?.price || (fuels as any)?.diesel?.price;
-			const price = diesel ? Number(diesel) : null;
-			if (price && price > 0) {
+			const f = fuels as any;
+			const candidates = [f?.diesel_b7?.price, f?.diesel?.price, f?.hi_premium_diesel?.price, f?.premium_diesel?.price]
+				.map(Number).filter((v) => v > 0);
+			const price = candidates.length > 0 ? Math.min(...candidates) : null;
+			if (price) {
 				addMetric("thai_oil_api", `diesel_${brandKey}`, price, "THB/L");
 			}
 		}

@@ -163,9 +163,9 @@ export default function HomePage() {
 		return () => clearInterval(interval);
 	}, [lang]);
 
-	const diesel = data?.prices.find(
-		(p) => p.name === "Hi Diesel S" || p.name.includes("Diesel S") || p.name.includes("ดีเซล"),
-	);
+	const diesel = data?.prices.find((p) => p.name === "Hi Diesel S" || p.name === "ไฮดีเซล เอส")
+		|| data?.prices.find((p) => p.name.includes("Diesel S") && !p.name.includes("Premium"))
+		|| data?.prices.find((p) => p.name.includes("ดีเซล") && !p.name.includes("พรีเมียม"));
 	const dieselPrice = diesel ? (diesel.today || diesel.price || 0) : 0;
 
 	return (
