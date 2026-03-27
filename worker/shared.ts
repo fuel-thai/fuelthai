@@ -1,4 +1,3 @@
-import postalCodes from "./data/thai-postal-codes.json";
 import districtNames from "./data/thai-districts.json";
 
 export type Bindings = {
@@ -10,22 +9,6 @@ export type Bindings = {
 	DB: D1Database;
 	R2: R2Bucket;
 };
-
-export interface PostalCode {
-	id: string;
-	zip: string;
-	province: string;
-	district: string;
-	lat: number;
-	lng: number;
-}
-
-export const postalLookup = new Map<string, PostalCode>();
-for (const entry of postalCodes as PostalCode[]) {
-	if (!postalLookup.has(entry.zip)) {
-		postalLookup.set(entry.zip, entry);
-	}
-}
 
 const districtLookup = districtNames as Record<string, string>;
 

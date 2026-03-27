@@ -1,9 +1,28 @@
 import { Hono } from "hono";
 import { cache } from "hono/cache";
 import type { Bindings } from "../shared";
-import { haversineKm, geohash, geohashNeighbors, postalLookup, districtEn } from "../shared";
+import { haversineKm, geohash, geohashNeighbors, districtEn, safeLimit } from "../shared";
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+interface PostalResult {
+	zip: string;
+	district_th: string;
+	district_en: string;
+	lat: number;
+	lng: number;
+	geohash5: string;
+	province_en: string | null;
+	province_th: string | null;
+}
+
+async function lookupPostal(db: D1Database, zip: string): Promise<PostalResult | null> {
+	return db.prepare(
+		`SELECT pc.*, p.name_en as province_en, p.name_th as province_th
+		 FROM postal_codes pc LEFT JOIN provinces p ON pc.province_id = p.id
+		 WHERE pc.zip = ?`
+	).bind(zip).first<PostalResult>();
+}
 
 // ─── PTT Stations ────────────────────────────────────────────────
 
@@ -18,7 +37,7 @@ app.get("/api/stations", async (c) => {
 	let lng: number;
 
 	if (postal) {
-		const entry = postalLookup.get(postal);
+		const entry = await lookupPostal(c.env.DB, postal);
 		if (!entry) {
 			return c.json({ error: `Unknown postal code: ${postal}. Thai postal codes are 5 digits (10000-96000).` }, 400);
 		}
@@ -117,11 +136,11 @@ app.get(
 		let locationName = "";
 
 		if (postal) {
-			const entry = postalLookup.get(postal);
+			const entry = await lookupPostal(c.env.DB, postal);
 			if (!entry) return c.json({ error: `Unknown postal code: ${postal}` }, 400);
 			lat = entry.lat;
 			lng = entry.lng;
-			locationName = `${entry.district}, ${entry.province}`;
+			locationName = `${entry.district_en}, ${entry.province_en || ""}`;
 		} else if (latQ && lngQ) {
 			lat = Number.parseFloat(latQ);
 			lng = Number.parseFloat(lngQ);
