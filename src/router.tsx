@@ -11,6 +11,7 @@ const CrisisPage = lazy(() => import('./pages/crisis-page'))
 const FeedPage = lazy(() => import('./pages/feed-page'))
 const StationPage = lazy(() => import('./pages/station-page'))
 const NewsPage = lazy(() => import('./pages/news-page'))
+const TrendsPage = lazy(() => import('./pages/trends-page'))
 
 function LazyPage({ children }: { children: React.ReactNode }) {
 	return (
@@ -130,7 +131,17 @@ const newsRoute = createRoute({
 	),
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, stationsRoute, availabilityRoute, statsRoute, regionRoute, provinceRoute, stationRoute, crisisRoute, feedRoute, newsRoute])
+const trendsRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/trends',
+	component: () => (
+		<LazyPage>
+			<TrendsPage />
+		</LazyPage>
+	),
+})
+
+const routeTree = rootRoute.addChildren([indexRoute, stationsRoute, availabilityRoute, statsRoute, regionRoute, provinceRoute, stationRoute, crisisRoute, feedRoute, newsRoute, trendsRoute])
 
 export const router = createRouter({
 	routeTree,
