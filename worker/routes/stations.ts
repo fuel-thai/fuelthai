@@ -5,6 +5,28 @@ import { haversineKm, geohash, geohashNeighbors, districtEn, safeLimit } from ".
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+// Circuit breaker for PumpRadar -- skip for 5min after failure
+let prCircuitOpen = 0;
+const PR_COOLDOWN_MS = 60 * 1000;
+
+async function fetchPumpRadar(lat: number, lng: number, radius: number): Promise<any> {
+	if (Date.now() < prCircuitOpen) return null;
+	try {
+		const res = await fetch(
+			`https://thaipumpradar.com/api/stations/nearby?lat=${lat}&lon=${lng}&radius=${Math.min(radius, 30)}`,
+			{ headers: { "User-Agent": "FUEL-TH/2.0 (fuelthai.com)" } },
+		);
+		if (!res.ok) {
+			prCircuitOpen = Date.now() + PR_COOLDOWN_MS;
+			return null;
+		}
+		return await res.json();
+	} catch {
+		prCircuitOpen = Date.now() + PR_COOLDOWN_MS;
+		return null;
+	}
+}
+
 function validateLatLng(lat: number, lng: number): string | null {
 	if (Number.isNaN(lat) || Number.isNaN(lng)) return "Invalid lat/lng values";
 	if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return "lat/lng out of bounds";
@@ -170,10 +192,7 @@ app.get(
 					LEFT JOIN provinces p ON s.province_id = p.id
 					WHERE ${conditions}`,
 				).bind(...params).all(),
-				fetch(
-					`https://thaipumpradar.com/api/stations/nearby?lat=${lat}&lon=${lng}&radius=${Math.min(radius, 30)}`,
-					{ headers: { "User-Agent": "FUEL-TH/2.0 (fuelthai.com)" } },
-				).then((r) => r.ok ? r.json() : null).catch(() => null),
+				fetchPumpRadar(lat, lng, radius),
 			]);
 
 			// Exact haversine filter (geohash is coarse, ~39km cells)

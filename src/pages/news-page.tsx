@@ -1,5 +1,6 @@
 import { useLanguage } from "../lib/language-store";
 import { SiteHeader } from "../components/site-header";
+import { SiteFooter } from "../components/site-footer";
 import { useEffect, useState } from "react";
 import { ExternalLink, Newspaper, Ship, Flame, Globe, RefreshCw } from "lucide-react";
 
@@ -195,14 +196,7 @@ export default function NewsPage() {
 				)}
 			</main>
 
-			<footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground">
-				<p>
-					FUEL::TH -- {lang === "th"
-						? "ข่าวพลังงานจาก OilPrice, gCaptain, Natural Gas Intel, Bangkok Post"
-						: "Energy news from OilPrice, gCaptain, Natural Gas Intel, Bangkok Post"}
-				</p>
-				<a href="mailto:fuel@lanta.dev" className="mt-1 inline-block text-[10px] text-muted-foreground/60 hover:text-muted-foreground">fuel@lanta.dev</a>
-			</footer>
+			<SiteFooter text="Energy news from OilPrice, gCaptain, Natural Gas Intel, Bangkok Post" textTh="ข่าวพลังงานจาก OilPrice, gCaptain, Natural Gas Intel, Bangkok Post" />
 		</div>
 	);
 }

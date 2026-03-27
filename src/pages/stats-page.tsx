@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLanguage } from "../lib/language-store";
 import { t } from "../lib/translations";
 import { SiteHeader } from "../components/site-header";
+import { SiteFooter } from "../components/site-footer";
 import { AreaChart, BarChart } from "../components/svg-chart";
 import { SkeletonChart } from "../components/skeleton";
 
@@ -195,10 +196,7 @@ export default function StatsPage() {
 				)}
 			</main>
 
-			<footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground">
-				<p>{t("footerStats", lang)}</p>
-				<a href="mailto:fuel@lanta.dev" className="mt-1 inline-block text-[10px] text-muted-foreground/60 hover:text-muted-foreground">fuel@lanta.dev</a>
-			</footer>
+			<SiteFooter text="Market data from FRED, Frankfurter, and thai-oil-api. Built during the 2026 Iran war energy crisis." textTh="ข้อมูลตลาดจาก FRED, Frankfurter, และ thai-oil-api สร้างในช่วงวิกฤตพลังงาน 2569" />
 		</div>
 	);
 }

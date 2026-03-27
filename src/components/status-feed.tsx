@@ -3,7 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { MapPin } from "lucide-react";
 import type { Lang } from "../lib/language-store";
 import { getPosition } from "../lib/geolocation";
+import { distanceKm } from "../lib/location-store";
 import { DistanceBadge } from "./distance-badge";
+import { getStatusConfig, statusLabel } from "../lib/diesel-status";
+import { mapsDirectionsUrl, timeAgo } from "../lib/brand-styles";
 
 interface FeedItem {
 	station_id: string;
@@ -23,46 +26,6 @@ interface FeedItem {
 	region: string;
 }
 
-const STATUS_LABELS: Record<string, Record<string, string>> = {
-	en: { available: "Available", limited: "Limited", out: "Out", pending_delivery: "Pending Delivery", unknown: "Unknown" },
-	th: { available: "มีดีเซล", limited: "จำกัด", out: "หมด", pending_delivery: "รอเติม", unknown: "ไม่ทราบ" },
-};
-
-const STATUS_COLORS: Record<string, string> = {
-	available: "text-emerald-400",
-	limited: "text-amber-400",
-	out: "text-red-400",
-	pending_delivery: "text-blue-400",
-	unknown: "text-muted-foreground",
-};
-
-const BRAND_COLORS: Record<string, string> = {
-	PTT: "text-yellow-400",
-	BANGCHAK: "text-green-400",
-	PT: "text-blue-400",
-	SHELL: "text-red-400",
-	CALTEX: "text-red-300",
-	SUSCO: "text-orange-400",
-	ESSO: "text-blue-300",
-	OTHER: "text-muted-foreground",
-};
-
-function timeAgo(isoDate: string, lang: Lang): string {
-	const mins = Math.round((Date.now() - new Date(isoDate).getTime()) / 60000);
-	if (mins < 1) return lang === "th" ? "เมื่อกี้" : "just now";
-	if (mins < 60) return `${mins}m`;
-	const hours = Math.round(mins / 60);
-	if (hours < 24) return `${hours}h`;
-	return `${Math.round(hours / 24)}d`;
-}
-
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-	const R = 6371;
-	const dLat = ((lat2 - lat1) * Math.PI) / 180;
-	const dLon = ((lon2 - lon1) * Math.PI) / 180;
-	const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
-	return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 export function StatusFeed({ lang, limit = 30 }: { lang: Lang; limit?: number }) {
 	const [items, setItems] = useState<FeedItem[]>([]);
@@ -98,7 +61,7 @@ export function StatusFeed({ lang, limit = 30 }: { lang: Lang; limit?: number })
 	}
 
 	const filtered = filterNearby && myLoc
-		? items.filter((item) => item.lat && item.lon && haversineKm(myLoc.lat, myLoc.lon, item.lat, item.lon) <= 50)
+		? items.filter((item) => item.lat && item.lon && distanceKm(myLoc.lat, myLoc.lon, item.lat, item.lon) <= 50)
 		: items;
 
 	if (loading) {
@@ -140,12 +103,12 @@ export function StatusFeed({ lang, limit = 30 }: { lang: Lang; limit?: number })
 				)}
 			</div>
 			{filtered.map((item, i) => {
-				const oldLabel = STATUS_LABELS[lang][item.old_status] || item.old_status;
-				const newLabel = STATUS_LABELS[lang][item.new_status] || item.new_status;
+				const oldLabel = statusLabel(item.old_status, lang);
+				const newLabel = statusLabel(item.new_status, lang);
 				const province = lang === "th" ? item.province_th : item.province_en;
 
 				const mapsUrl = item.lat && item.lon
-					? `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lon}&travelmode=driving`
+					? mapsDirectionsUrl(item.lat, item.lon)
 					: null;
 				const isGoodNews = item.new_status === "available" || item.new_status === "limited";
 
@@ -168,9 +131,9 @@ export function StatusFeed({ lang, limit = 30 }: { lang: Lang; limit?: number })
 						</div>
 						<div className="mt-1.5 flex items-center justify-between">
 							<span className="flex items-center gap-1.5 font-mono text-xs">
-								<span className={STATUS_COLORS[item.old_status]}>{oldLabel}</span>
+								<span className={getStatusConfig(item.old_status).text}>{oldLabel}</span>
 								<span className="text-muted-foreground">&rarr;</span>
-								<span className={`font-bold ${STATUS_COLORS[item.new_status]}`}>{newLabel}</span>
+								<span className={`font-bold ${getStatusConfig(item.new_status).text}`}>{newLabel}</span>
 							</span>
 							{mapsUrl && (
 								<a href={mapsUrl} target="_blank" rel="noreferrer" className="rounded bg-primary/20 px-2 py-0.5 font-mono text-[10px] font-bold text-primary hover:bg-primary/30">

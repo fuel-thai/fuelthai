@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useLanguage } from "../lib/language-store";
 import { t } from "../lib/translations";
 import { SiteHeader } from "../components/site-header";
+import { SiteFooter } from "../components/site-footer";
 import { Skeleton, SkeletonProvinceRow } from "../components/skeleton";
 
 interface ProvinceStats {
@@ -227,10 +228,7 @@ export default function RegionPage() {
 				)}
 			</main>
 
-			<footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground">
-				<p>FUEL::TH / {lang === "th" ? "ภูมิภาค" : "REGIONS"} -- {lang === "th" ? "ข้อมูลจาก DOEB Fuel Now สร้างในช่วงวิกฤตพลังงาน 2569" : "Data from DOEB Fuel Now. Built during the 2026 Iran war energy crisis."}</p>
-				<a href="mailto:fuel@lanta.dev" className="mt-1 inline-block text-[10px] text-muted-foreground/60 hover:text-muted-foreground">fuel@lanta.dev</a>
-			</footer>
+			<SiteFooter text="Data from DOEB Fuel Now. Built during the 2026 Iran war energy crisis." textTh="ข้อมูลจาก DOEB Fuel Now สร้างในช่วงวิกฤตพลังงาน 2569" />
 		</div>
 	);
 }

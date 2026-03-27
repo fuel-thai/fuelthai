@@ -3,11 +3,14 @@ import { Link, useParams } from "@tanstack/react-router";
 import { useLanguage } from "../lib/language-store";
 import { t } from "../lib/translations";
 import { SiteHeader } from "../components/site-header";
+import { SiteFooter } from "../components/site-footer";
 import { BrandBadge } from "../components/brand-badge";
 import { SkeletonCard } from "../components/skeleton";
 import { DistanceBadge } from "../components/distance-badge";
 import { ShareButtons } from "../components/share-buttons";
 import { StationSubscribe } from "../components/station-subscribe";
+import { getStatusConfig, statusLabel } from "../lib/diesel-status";
+import { mapsDirectionsUrl, timeAgo } from "../lib/brand-styles";
 
 interface StationDetail {
 	id: string;
@@ -40,22 +43,6 @@ interface StatusChange {
 	source: string;
 }
 
-const STATUS_CONFIG: Record<string, { bg: string; text: string; border: string; label_en: string; label_th: string }> = {
-	available: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/30", label_en: "DIESEL AVAILABLE", label_th: "มีดีเซล" },
-	limited: { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/30", label_en: "DIESEL LIMITED", label_th: "ดีเซลจำกัด" },
-	out: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/30", label_en: "DIESEL OUT", label_th: "ดีเซลหมด" },
-	pending_delivery: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/30", label_en: "DELIVERY EXPECTED", label_th: "รอเติม" },
-	unknown: { bg: "bg-card", text: "text-muted-foreground", border: "border-border", label_en: "NO DATA", label_th: "ไม่มีข้อมูล" },
-};
-
-function timeAgo(iso: string): string {
-	const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
-	if (mins < 1) return "just now";
-	if (mins < 60) return `${mins}m ago`;
-	const hours = Math.round(mins / 60);
-	if (hours < 24) return `${hours}h ago`;
-	return `${Math.round(hours / 24)}d ago`;
-}
 
 export default function StationPage() {
 	const { lang } = useLanguage();
@@ -83,8 +70,8 @@ export default function StationPage() {
 			.finally(() => setLoading(false));
 	}, [id]);
 
-	const cfg = STATUS_CONFIG[station?.last_diesel_status || "unknown"] || STATUS_CONFIG.unknown;
-	const mapsUrl = station ? `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lon}&travelmode=driving` : null;
+	const cfg = getStatusConfig(station?.last_diesel_status || "unknown");
+	const mapsUrl = station ? mapsDirectionsUrl(station.lat, station.lon) : null;
 	const mapsEmbed = station ? `https://www.google.com/maps?q=${station.lat},${station.lon}&z=15&output=embed` : null;
 	const province = station ? (lang === "th" ? station.province_th : station.province_en) : "";
 
@@ -134,7 +121,7 @@ export default function StationPage() {
 							{/* Big diesel status */}
 							<div className="mt-4">
 								<span className={`inline-block rounded-full border px-6 py-3 font-mono text-lg font-black tracking-wider ${cfg.border} ${cfg.text}`}>
-									{lang === "th" ? cfg.label_th : cfg.label_en}
+									{statusLabel(station?.last_diesel_status || "unknown", lang)}
 								</span>
 							</div>
 
@@ -164,11 +151,8 @@ export default function StationPage() {
 							)}
 							<ShareButtons
 								lang={lang}
-								title={`${station.name} -- ${lang === "th" ? cfg.label_th : cfg.label_en}`}
-								text={lang === "th"
-									? `${station.name} (${station.brand_id}) -- ${cfg.label_th} | FUEL::TH`
-									: `${station.name} (${station.brand_id}) -- ${cfg.label_en} | FUEL::TH`
-								}
+								title={`${station.name} -- ${statusLabel(station?.last_diesel_status || "unknown", lang)}`}
+								text={`${station.name} (${station.brand_id}) -- ${statusLabel(station?.last_diesel_status || "unknown", lang)} | FUEL::TH`}
 							/>
 						</div>
 
@@ -232,17 +216,17 @@ export default function StationPage() {
 							) : (
 								<div className="space-y-1">
 									{changes.map((c, i) => {
-										const oldCfg = STATUS_CONFIG[c.old_status] || STATUS_CONFIG.unknown;
-										const newCfg = STATUS_CONFIG[c.new_status] || STATUS_CONFIG.unknown;
+										const oldCfg = getStatusConfig(c.old_status);
+										const newCfg = getStatusConfig(c.new_status);
 										return (
 											<div key={i} className="flex items-center gap-3 rounded px-2 py-1.5 text-xs hover:bg-muted/30">
 												<span className="shrink-0 font-mono text-[10px] text-muted-foreground w-16">
 													{timeAgo(c.recorded_at)}
 												</span>
 												<span className="flex items-center gap-1.5 font-mono">
-													<span className={oldCfg.text}>{lang === "th" ? oldCfg.label_th : oldCfg.label_en}</span>
+													<span className={oldCfg.text}>{statusLabel(c.old_status, lang)}</span>
 													<span className="text-muted-foreground">&rarr;</span>
-													<span className={`font-bold ${newCfg.text}`}>{lang === "th" ? newCfg.label_th : newCfg.label_en}</span>
+													<span className={`font-bold ${newCfg.text}`}>{statusLabel(c.new_status, lang)}</span>
 												</span>
 												<span className="text-[9px] text-muted-foreground ml-auto">{c.source}</span>
 											</div>
@@ -262,10 +246,7 @@ export default function StationPage() {
 				)}
 			</main>
 
-			<footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground">
-				<p>FUEL::TH -- {lang === "th" ? "ข้อมูลจาก DOEB Fuel Now" : "Data from DOEB Fuel Now"}</p>
-				<a href="mailto:fuel@lanta.dev" className="mt-1 inline-block text-[10px] text-muted-foreground/60 hover:text-muted-foreground">fuel@lanta.dev</a>
-			</footer>
+			<SiteFooter text="Data from DOEB Fuel Now" textTh="ข้อมูลจาก DOEB Fuel Now" />
 		</div>
 	);
 }

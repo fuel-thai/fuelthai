@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useLanguage } from "../lib/language-store";
 import { SiteHeader } from "../components/site-header";
+import { SiteFooter } from "../components/site-footer";
 
 export default function CrisisPage() {
 	const { lang } = useLanguage();
@@ -100,10 +101,7 @@ export default function CrisisPage() {
 				</div>
 			</main>
 
-			<footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground">
-				<p>FUEL::TH -- {lang === "th" ? "สร้างในช่วงวิกฤตพลังงานจากสงครามอิหร่าน 2569" : "Built during the 2026 Iran war energy crisis."}</p>
-				<a href="mailto:fuel@lanta.dev" className="mt-1 inline-block text-[10px] text-muted-foreground/60 hover:text-muted-foreground">fuel@lanta.dev</a>
-			</footer>
+			<SiteFooter text="Built during the 2026 Iran war energy crisis." textTh="สร้างในช่วงวิกฤตพลังงานจากสงครามอิหร่าน 2569" />
 		</div>
 	);
 }

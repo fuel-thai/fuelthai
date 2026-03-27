@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useLanguage } from "../lib/language-store";
 import { t } from "../lib/translations";
 import { SiteHeader } from "../components/site-header";
+import { SiteFooter } from "../components/site-footer";
 import { Sparkline } from "../components/svg-chart";
 import { StatusFeed } from "../components/status-feed";
 import { Skeleton, SkeletonHero, SkeletonPriceCard, SkeletonChart, SkeletonBrandGrid } from "../components/skeleton";
@@ -453,10 +454,7 @@ export default function HomePage() {
 				<BrentInfoContent lang={lang} />
 			</InfoModal>
 
-			<footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground">
-				<p>{t("footerHome", lang)}</p>
-				<a href="mailto:fuel@lanta.dev" className="mt-1 inline-block text-[10px] text-muted-foreground/60 hover:text-muted-foreground">fuel@lanta.dev</a>
-			</footer>
+			<SiteFooter text="Real-time Thailand fuel prices via Bangchak API. Built during the 2026 Iran war energy crisis." textTh="ราคาน้ำมันไทยแบบเรียลไทม์จาก Bangchak API สร้างในช่วงวิกฤตพลังงานจากสงครามอิหร่าน 2569" />
 		</div>
 	);
 }

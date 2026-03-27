@@ -3,8 +3,11 @@ import { Link, useParams } from "@tanstack/react-router";
 import { useLanguage } from "../lib/language-store";
 import { t } from "../lib/translations";
 import { SiteHeader } from "../components/site-header";
+import { SiteFooter } from "../components/site-footer";
 import { SkeletonCard } from "../components/skeleton";
 import { BrandBadge } from "../components/brand-badge";
+import { getStatusConfig, statusLabel } from "../lib/diesel-status";
+import { mapsDirectionsUrl } from "../lib/brand-styles";
 
 interface Province {
 	id: number;
@@ -36,13 +39,6 @@ interface Summary {
 	total: number;
 }
 
-const STATUS_COLORS: Record<string, { bg: string; text: string; label_en: string; label_th: string }> = {
-	available: { bg: "border-emerald-500/30 bg-emerald-500/5", text: "text-emerald-400", label_en: "AVAILABLE", label_th: "มี" },
-	limited: { bg: "border-amber-500/30 bg-amber-500/5", text: "text-amber-400", label_en: "LIMITED", label_th: "จำกัด" },
-	out: { bg: "border-red-500/30 bg-red-500/5", text: "text-red-400", label_en: "OUT", label_th: "หมด" },
-	pending_delivery: { bg: "border-blue-500/30 bg-blue-500/5", text: "text-blue-400", label_en: "PENDING", label_th: "รอเติม" },
-	unknown: { bg: "border-border bg-card", text: "text-muted-foreground", label_en: "UNKNOWN", label_th: "ไม่ทราบ" },
-};
 
 export default function ProvincePage() {
 	const { lang } = useLanguage();
@@ -119,12 +115,12 @@ export default function ProvincePage() {
 
 				{/* Station list */}
 				{!loading && stations.map((s) => {
-					const cfg = STATUS_COLORS[s.last_diesel_status] || STATUS_COLORS.unknown;
+					const cfg = getStatusConfig(s.last_diesel_status);
 					const isUnknown = s.last_diesel_status === "unknown";
-					const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}&travelmode=driving`;
+					const mapsUrl = mapsDirectionsUrl(s.lat, s.lon);
 
 					return (
-						<div key={s.id} className={`rounded-lg border p-3 ${isUnknown ? "opacity-40 border-border bg-card" : cfg.bg}`}>
+						<div key={s.id} className={`rounded-lg border p-3 ${isUnknown ? "opacity-40 border-border bg-card" : `${cfg.border} ${cfg.bg}`}`}>
 							<div className="flex items-start justify-between gap-2">
 								<div className="min-w-0 flex-1">
 									<div className="flex items-center gap-2 flex-wrap">
@@ -134,7 +130,7 @@ export default function ProvincePage() {
 									{(s.amphoe || s.amphoe_en) && <p className="text-[10px] text-muted-foreground mt-0.5">{lang === "th" ? s.amphoe : (s.amphoe_en || s.amphoe)}</p>}
 								</div>
 								<span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold ${cfg.text}`}>
-									{lang === "th" ? cfg.label_th : cfg.label_en}
+									{statusLabel(s.last_diesel_status, lang)}
 								</span>
 							</div>
 							<div className="mt-2 flex items-center gap-3 text-xs">
@@ -163,10 +159,7 @@ export default function ProvincePage() {
 				)}
 			</main>
 
-			<footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground">
-				<p>FUEL::TH -- {lang === "th" ? "ข้อมูลจาก DOEB Fuel Now" : "Data from DOEB Fuel Now"}</p>
-				<a href="mailto:fuel@lanta.dev" className="mt-1 inline-block text-[10px] text-muted-foreground/60 hover:text-muted-foreground">fuel@lanta.dev</a>
-			</footer>
+			<SiteFooter text="Data from DOEB Fuel Now" textTh="ข้อมูลจาก DOEB Fuel Now" />
 		</div>
 	);
 }
