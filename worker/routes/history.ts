@@ -95,4 +95,87 @@ app.get("/api/brands", cache({ cacheName: "brands-ref-v1", cacheControl: "public
 	return c.json({ brands: brands.results, count: brands.results.length });
 });
 
+// ─── Price History (tracked metrics over time) ──────────────────
+
+app.get("/api/history/prices",
+	cache({ cacheName: "price-history-v1", cacheControl: "public, max-age=3600" }),
+	async (c) => {
+		const db = c.env.DB;
+		if (!db) return c.json({ error: "Database not configured" }, 500);
+
+		const metric = c.req.query("metric");
+		const days = safeLimit(c.req.query("days"), 90, 365);
+
+		let query = "SELECT date, source, metric, value, unit FROM price_history";
+		const params: (string | number)[] = [];
+
+		if (metric) {
+			query += " WHERE metric = ? AND date >= date('now', '-' || ? || ' days') ORDER BY date";
+			params.push(metric, days);
+		} else {
+			query += " WHERE date >= date('now', '-' || ? || ' days') ORDER BY metric, date";
+			params.push(days);
+		}
+
+		const result = await db.prepare(query).bind(...params).all();
+		return c.json({ data: result.results, count: result.results.length });
+	},
+);
+
+app.get("/api/history/prices/latest",
+	cache({ cacheName: "price-latest-v1", cacheControl: "public, max-age=1800" }),
+	async (c) => {
+		const db = c.env.DB;
+		if (!db) return c.json({ error: "Database not configured" }, 500);
+
+		const result = await db.prepare(
+			`SELECT metric, value, unit, date, source FROM price_history
+			 WHERE id IN (SELECT MAX(id) FROM price_history GROUP BY metric)
+			 ORDER BY metric`,
+		).all();
+		return c.json({ data: result.results, count: result.results.length });
+	},
+);
+
+// ─── Ingest endpoint (for external data pushers like NAS cron) ──
+
+app.post("/api/ingest", async (c) => {
+	const secret = c.env.CRON_SECRET;
+	if (!secret) return c.json({ error: "Auth not configured" }, 500);
+	const provided = c.req.header("X-Cron-Key") || "";
+	const encoder = new TextEncoder();
+	const ab = encoder.encode(provided);
+	const bb = encoder.encode(secret);
+	let cmp = ab.length !== bb.length ? 1 : 0;
+	for (let i = 0; i < Math.min(ab.length, bb.length); i++) cmp |= ab[i] ^ bb[i];
+	if (cmp !== 0) return c.json({ error: "Unauthorized" }, 401);
+
+	const db = c.env.DB;
+	if (!db) return c.json({ error: "Database not configured" }, 500);
+
+	const body: any = await c.req.json();
+	const metrics = Array.isArray(body) ? body : body.metrics;
+	if (!Array.isArray(metrics) || metrics.length === 0) {
+		return c.json({ error: "Expected array of {date, source, metric, value, unit?}" }, 400);
+	}
+
+	const isoNow = new Date().toISOString();
+	const stmts = metrics
+		.filter((m: any) => m.date && m.source && m.metric && m.value != null)
+		.map((m: any) =>
+			db.prepare(
+				"INSERT OR IGNORE INTO price_history (date, source, metric, value, unit, recorded_at) VALUES (?, ?, ?, ?, ?, ?)",
+			).bind(m.date, m.source, m.metric, Number(m.value), m.unit || null, isoNow),
+		);
+
+	if (stmts.length === 0) return c.json({ error: "No valid metrics in payload" }, 400);
+
+	// Batch in chunks of 100
+	for (let i = 0; i < stmts.length; i += 100) {
+		await db.batch(stmts.slice(i, i + 100));
+	}
+
+	return c.json({ ok: true, ingested: stmts.length });
+});
+
 export default app;

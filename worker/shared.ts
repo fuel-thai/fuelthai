@@ -6,6 +6,11 @@ export type Bindings = {
 	VAPID_PUBLIC_KEY?: string;
 	VAPID_PRIVATE_KEY?: string;
 	VAPID_SUBJECT?: string;
+	FRED_API_KEY?: string;
+	BOT_EXCHANGE_KEY?: string;
+	BOT_INTEREST_KEY?: string;
+	BOT_STATS_KEY?: string;
+	AISSTREAM_API_KEY?: string;
 	DB: D1Database;
 	R2: R2Bucket;
 };

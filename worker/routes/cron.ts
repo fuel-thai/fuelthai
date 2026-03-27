@@ -5,6 +5,90 @@ import { geohash, geohashNeighbors, stationHash, haversineKm, safeLimit } from "
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+// ─── Daily Price Snapshot Capture ─────────────────────────────────
+
+async function capturePriceSnapshots(env: Bindings, today: string) {
+	// Check if we already captured today
+	const existing = await env.DB.prepare(
+		"SELECT COUNT(*) as cnt FROM price_history WHERE date = ?",
+	).bind(today).first<{ cnt: number }>();
+	if (existing && existing.cnt > 0) return;
+
+	const stmts: D1PreparedStatement[] = [];
+	const isoNow = new Date().toISOString();
+
+	function addMetric(source: string, metric: string, value: number | null, unit?: string) {
+		if (value == null || Number.isNaN(value)) return;
+		stmts.push(
+			env.DB.prepare(
+				"INSERT OR IGNORE INTO price_history (date, source, metric, value, unit, recorded_at) VALUES (?, ?, ?, ?, ?, ?)",
+			).bind(today, source, metric, value, unit || null, isoNow),
+		);
+	}
+
+	// Fetch all sources in parallel
+	const [crudeRes, exchangeRes, brandRes, fredFertRes, fredPlasticRes] = await Promise.all([
+		fetch("https://query1.finance.yahoo.com/v8/finance/chart/BZ=F?range=1d&interval=1d", {
+			headers: { "User-Agent": "Mozilla/5.0 (compatible; FUEL-TH/2.0)" },
+		}).then((r) => r.ok ? r.json() : null).catch(() => null),
+
+		fetch("https://api.frankfurter.app/latest?from=USD&to=THB", {
+			headers: { "User-Agent": "FUEL-TH/2.0" },
+		}).then((r) => r.ok ? r.json() : null).catch(() => null),
+
+		fetch("https://api.chnwt.dev/thai-oil-api/latest", {
+			headers: { "User-Agent": "FUEL-TH/2.0" },
+		}).then((r) => r.ok ? r.json() : null).catch(() => null),
+
+		env.FRED_API_KEY
+			? fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=PCU3253132531&api_key=${env.FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`)
+				.then((r) => r.ok ? r.json() : null).catch(() => null)
+			: null,
+
+		env.FRED_API_KEY
+			? fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=WPU066&api_key=${env.FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`)
+				.then((r) => r.ok ? r.json() : null).catch(() => null)
+			: null,
+	]);
+
+	// Brent crude
+	const crudePrice = (crudeRes as any)?.chart?.result?.[0]?.meta?.regularMarketPrice;
+	addMetric("yahoo_finance", "brent_crude_usd", crudePrice, "USD/bbl");
+
+	// THB/USD
+	const thbRate = (exchangeRes as any)?.rates?.THB;
+	addMetric("frankfurter", "thb_usd", thbRate, "THB/USD");
+
+	// Brand diesel prices -- shape: response.stations.{brand}.diesel_b7.price
+	const brandStations = (brandRes as any)?.response?.stations;
+	if (brandStations && typeof brandStations === "object") {
+		for (const [brandKey, fuels] of Object.entries(brandStations)) {
+			const diesel = (fuels as any)?.diesel_b7?.price || (fuels as any)?.diesel?.price;
+			const price = diesel ? Number(diesel) : null;
+			if (price && price > 0) {
+				addMetric("thai_oil_api", `diesel_${brandKey}`, price, "THB/L");
+			}
+		}
+	}
+
+	// FRED fertilizer manufacturing PPI
+	const fertObs = (fredFertRes as any)?.observations?.[0];
+	if (fertObs?.value && fertObs.value !== ".") {
+		addMetric("fred", "fertilizer_ppi", Number(fertObs.value), "index");
+	}
+
+	// FRED plastic resins PPI
+	const plasticObs = (fredPlasticRes as any)?.observations?.[0];
+	if (plasticObs?.value && plasticObs.value !== ".") {
+		addMetric("fred", "plastic_resins_ppi", Number(plasticObs.value), "index");
+	}
+
+	// Batch insert all metrics
+	if (stmts.length > 0) {
+		await env.DB.batch(stmts);
+	}
+}
+
 // ─── Cron Handler (exported for scheduled() in worker.ts) ────────
 
 export async function handleCron(env: Bindings) {
@@ -253,7 +337,12 @@ export async function handleCron(env: Bindings) {
 			} catch { /* push errors shouldn't break the cron */ }
 		}
 
-		// 5. Update log entry + cleanup old data (keep 30 days)
+		// 5. Capture daily price snapshots (once per day, skip if already recorded)
+		try {
+			await capturePriceSnapshots(env, isoNow.slice(0, 10));
+		} catch { /* price snapshot errors shouldn't break cron */ }
+
+		// 6. Update log entry + cleanup old data (keep 30 days)
 		if (logId) {
 			await env.DB.batch([
 				env.DB.prepare(
