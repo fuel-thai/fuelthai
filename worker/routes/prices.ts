@@ -217,8 +217,9 @@ app.get(
 	cache({ cacheName: "crude-prices-v2", cacheControl: "public, max-age=1800, stale-while-revalidate=3600" }),
 	async (c) => {
 		try {
-			// Try Yahoo Finance first (intraday), fallback to EIA (daily)
-			const result = await fetchYahooCrude() || await fetchEiaCrude();
+			// Fetch both in parallel, prefer Yahoo (intraday) over EIA (daily)
+			const [yahoo, eia] = await Promise.all([fetchYahooCrude(), fetchEiaCrude()]);
+			const result = yahoo || eia;
 			if (!result || result.observations.length === 0) {
 				return c.json({ error: "All crude price sources unavailable" }, 502);
 			}

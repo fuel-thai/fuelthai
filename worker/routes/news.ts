@@ -73,8 +73,7 @@ app.get(
 				feeds.map((feed) => fetchRss(`https://www.bangkokpost.com/rss/data/${feed}.xml`)),
 			);
 
-			const allXml = results.join("\n");
-			const articles = parseRssItems(allXml, "Bangkok Post", "thailand");
+			const articles = results.flatMap((xml) => parseRssItems(xml, "Bangkok Post", "thailand"));
 			const seen = new Set<string>();
 			const filtered = articles.filter((a) => {
 				if (seen.has(a.link)) return false;

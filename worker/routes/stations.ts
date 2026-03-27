@@ -5,6 +5,12 @@ import { haversineKm, geohash, geohashNeighbors, districtEn, safeLimit } from ".
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+function validateLatLng(lat: number, lng: number): string | null {
+	if (Number.isNaN(lat) || Number.isNaN(lng)) return "Invalid lat/lng values";
+	if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return "lat/lng out of bounds";
+	return null;
+}
+
 interface PostalResult {
 	zip: string;
 	district_th: string;
@@ -46,9 +52,8 @@ app.get("/api/stations", async (c) => {
 	} else if (latQ && lngQ) {
 		lat = Number.parseFloat(latQ);
 		lng = Number.parseFloat(lngQ);
-		if (Number.isNaN(lat) || Number.isNaN(lng)) {
-			return c.json({ error: "Invalid lat/lng values" }, 400);
-		}
+		const err = validateLatLng(lat, lng);
+		if (err) return c.json({ error: err }, 400);
 	} else {
 		return c.json({ error: "Provide ?postal=XXXXX or ?lat=X&lng=Y" }, 400);
 	}
@@ -152,16 +157,24 @@ app.get(
 			// Geohash lookup: precision 4 (~39km cells) + neighbors for coverage
 			const gh4 = geohash(lat, lng, 4);
 			const searchHashes = geohashNeighbors(gh4);
+			// Safety: conditions are built from computed geohash strings, not user input
 			const conditions = searchHashes.map(() => "s.geohash5 LIKE ?").join(" OR ");
 			const params = searchHashes.map((gh) => `${gh}%`);
 
-			const result = await c.env.DB.prepare(
-				`SELECT s.id, s.name, s.brand_id as brand, s.amphoe, s.lat, s.lon, s.last_diesel_status, s.last_report_at,
-					p.name_en as province_en, p.name_th as province_th
-				FROM stations s
-				LEFT JOIN provinces p ON s.province_id = p.id
-				WHERE ${conditions}`,
-			).bind(...params).all();
+			// D1 geohash query + PumpRadar overlay in parallel
+			const [result, prData] = await Promise.all([
+				c.env.DB.prepare(
+					`SELECT s.id, s.name, s.brand_id as brand, s.amphoe, s.lat, s.lon, s.last_diesel_status, s.last_report_at,
+						p.name_en as province_en, p.name_th as province_th
+					FROM stations s
+					LEFT JOIN provinces p ON s.province_id = p.id
+					WHERE ${conditions}`,
+				).bind(...params).all(),
+				fetch(
+					`https://thaipumpradar.com/api/stations/nearby?lat=${lat}&lon=${lng}&radius=${Math.min(radius, 30)}`,
+					{ headers: { "User-Agent": "FUEL-TH/2.0 (fuelthai.com)" } },
+				).then((r) => r.ok ? r.json() : null).catch(() => null),
+			]);
 
 			// Exact haversine filter (geohash is coarse, ~39km cells)
 			const nearby = (result.results as any[])
@@ -170,17 +183,9 @@ app.get(
 
 			// PumpRadar overlay for crowdsourced notes/photos/queue
 			const prLookup = new Map<string, any>();
-			try {
-				const prRes = await fetch(
-					`https://thaipumpradar.com/api/stations/nearby?lat=${lat}&lon=${lng}&radius=${Math.min(radius, 30)}`,
-					{ headers: { "User-Agent": "FUEL-TH/2.0 (fuel.lanta.dev)" } },
-				);
-				if (prRes.ok) {
-					for (const ps of ((await prRes.json()) as any)?.stations || []) {
-						prLookup.set(`${(ps.lat || 0).toFixed(3)},${(ps.lon || 0).toFixed(3)}`, ps);
-					}
-				}
-			} catch { /* PumpRadar down is not fatal */ }
+			for (const ps of (prData as any)?.stations || []) {
+				prLookup.set(`${(ps.lat || 0).toFixed(3)},${(ps.lon || 0).toFixed(3)}`, ps);
+			}
 
 			const STALE_THRESHOLD = 480;
 			const stations = nearby.map((s) => {

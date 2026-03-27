@@ -160,15 +160,7 @@ export async function handleCron(env: Bindings) {
 		// 8. Send push notifications for STATION-specific subscribers
 		if (changesCount > 0 && env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY) {
 			try {
-				// Get all station IDs that changed
-				const changedIds = [...new Set([
-					...updateStmts.map((_, i) => {
-						// Extract station IDs from the change tracking above
-						return null; // Can't easily extract from prepared statements
-					}),
-				])].filter(Boolean);
-
-				// Better approach: query recent changes from D1
+				// Query recent diesel-available changes from D1
 				const recentChanges = await env.DB.prepare(
 					"SELECT DISTINCT station_id, new_status FROM status_changes WHERE recorded_at = ? AND new_status IN ('available', 'limited')",
 				).bind(isoNow).all();
@@ -261,11 +253,16 @@ export async function handleCron(env: Bindings) {
 			} catch { /* push errors shouldn't break the cron */ }
 		}
 
-		// 5. Update log entry
+		// 5. Update log entry + cleanup old data (keep 30 days)
 		if (logId) {
-			await env.DB.prepare(
-				"UPDATE cron_log SET finished_at = ?, status = 'ok', stations_fetched = ?, new_stations = ?, status_changes = ?, provinces = ?, r2_key = ? WHERE id = ?",
-			).bind(new Date().toISOString(), stations.length, newStations, changesCount, Object.keys(provinceStats).length, r2Key, logId).run();
+			await env.DB.batch([
+				env.DB.prepare(
+					"UPDATE cron_log SET finished_at = ?, status = 'ok', stations_fetched = ?, new_stations = ?, status_changes = ?, provinces = ?, r2_key = ? WHERE id = ?",
+				).bind(new Date().toISOString(), stations.length, newStations, changesCount, Object.keys(provinceStats).length, r2Key, logId),
+				env.DB.prepare("DELETE FROM regional_stats WHERE recorded_at < datetime(?, '-30 days')").bind(isoNow),
+				env.DB.prepare("DELETE FROM cron_log WHERE started_at < datetime(?, '-30 days')").bind(isoNow),
+				env.DB.prepare("DELETE FROM status_changes WHERE recorded_at < datetime(?, '-90 days')").bind(isoNow),
+			]);
 		}
 	} catch (err) {
 		const errMsg = err instanceof Error ? err.message : "Unknown error";
@@ -278,11 +275,23 @@ export async function handleCron(env: Bindings) {
 
 // ─── Admin endpoints (protected by CRON_SECRET) ─────────────────
 
+function constantTimeEqual(a: string, b: string): boolean {
+	if (a.length !== b.length) return false;
+	const encoder = new TextEncoder();
+	const ab = encoder.encode(a);
+	const bb = encoder.encode(b);
+	let result = 0;
+	for (let i = 0; i < ab.length; i++) {
+		result |= ab[i] ^ bb[i];
+	}
+	return result === 0;
+}
+
 app.use("/api/cron/*", async (c, next) => {
 	const secret = c.env.CRON_SECRET;
 	if (!secret) return c.json({ error: "Auth not configured" }, 500);
-	const provided = c.req.header("X-Cron-Key") || c.req.query("key");
-	if (provided !== secret) return c.json({ error: "Unauthorized" }, 401);
+	const provided = c.req.header("X-Cron-Key") || "";
+	if (!constantTimeEqual(provided, secret)) return c.json({ error: "Unauthorized" }, 401);
 	await next();
 });
 
@@ -309,19 +318,22 @@ app.get("/api/cron/stats", async (c) => {
 	const db = c.env.DB;
 	if (!db) return c.json({ error: "Database not configured" }, 500);
 
-	const stationCount = await db.prepare("SELECT COUNT(*) as count FROM stations").first<{ count: number }>();
-	const changeCount = await db.prepare("SELECT COUNT(*) as count FROM status_changes").first<{ count: number }>();
-	const regionCount = await db.prepare("SELECT COUNT(*) as count FROM regional_stats").first<{ count: number }>();
-	const lastCron = await db.prepare("SELECT id, started_at, finished_at, status, stations_fetched, new_stations, status_changes, provinces FROM cron_log ORDER BY id DESC LIMIT 1").first();
+	const [stations, changes, regions, cronLog, pushSubs] = await db.batch([
+		db.prepare("SELECT COUNT(*) as count FROM stations"),
+		db.prepare("SELECT COUNT(*) as count FROM status_changes"),
+		db.prepare("SELECT COUNT(*) as count FROM regional_stats"),
+		db.prepare("SELECT id, started_at, finished_at, status, stations_fetched, new_stations, status_changes, provinces FROM cron_log ORDER BY id DESC LIMIT 1"),
+		db.prepare("SELECT COUNT(*) as count FROM push_subscriptions"),
+	]);
 
 	return c.json({
 		db: {
-			stations: stationCount?.count || 0,
-			statusChanges: changeCount?.count || 0,
-			regionalStats: regionCount?.count || 0,
-			pushSubscribers: ((await db.prepare("SELECT COUNT(*) as count FROM push_subscriptions").first<{ count: number }>())?.count || 0),
+			stations: (stations.results[0] as any)?.count || 0,
+			statusChanges: (changes.results[0] as any)?.count || 0,
+			regionalStats: (regions.results[0] as any)?.count || 0,
+			pushSubscribers: (pushSubs.results[0] as any)?.count || 0,
 		},
-		lastCron,
+		lastCron: cronLog.results[0] || null,
 	});
 });
 

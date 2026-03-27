@@ -4,6 +4,24 @@ import { geohash } from "../shared";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+const ALLOWED_PUSH_DOMAINS = [
+	"push.services.mozilla.com",
+	"fcm.googleapis.com",
+	"notify.windows.com",
+	"web.push.apple.com",
+	"updates.push.services.mozilla.com",
+];
+
+function isValidPushEndpoint(endpoint: string): boolean {
+	try {
+		const url = new URL(endpoint);
+		if (url.protocol !== "https:") return false;
+		return ALLOWED_PUSH_DOMAINS.some((d) => url.hostname === d || url.hostname.endsWith(`.${d}`));
+	} catch {
+		return false;
+	}
+}
+
 // ─── Push Notifications ──────────────────────────────────────────
 
 app.get("/api/push/vapid", (c) => {
@@ -19,6 +37,9 @@ app.post("/api/push/subscribe", async (c) => {
 
 	if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
 		return c.json({ error: "Invalid subscription" }, 400);
+	}
+	if (!isValidPushEndpoint(subscription.endpoint)) {
+		return c.json({ error: "Invalid push endpoint" }, 400);
 	}
 	if (!lat || !lon) return c.json({ error: "Location required" }, 400);
 
@@ -59,6 +80,9 @@ app.post("/api/push/subscribe-station", async (c) => {
 
 	if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
 		return c.json({ error: "Invalid subscription" }, 400);
+	}
+	if (!isValidPushEndpoint(subscription.endpoint)) {
+		return c.json({ error: "Invalid push endpoint" }, 400);
 	}
 	if (!stationId) return c.json({ error: "Station ID required" }, 400);
 

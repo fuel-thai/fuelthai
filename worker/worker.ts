@@ -15,8 +15,8 @@ const app = new Hono<{ Bindings: Bindings }>();
 // ─── Global Middleware ───────────────────────────────────────────
 
 app.use("/api/*", cors({
-	origin: ["https://fuelthai.com", "https://www.fuelthai.com", "https://fuel.lanta.dev", "https://fuel-staging.lanta.dev", "https://thai-fuel.preview.frst.dev"],
-	allowMethods: ["GET", "OPTIONS"],
+	origin: ["https://fuelthai.com", "https://www.fuelthai.com", "https://fuel.lanta.dev", "https://fuel-staging.lanta.dev"],
+	allowMethods: ["GET", "POST", "OPTIONS"],
 }));
 
 // Security headers on all API responses
