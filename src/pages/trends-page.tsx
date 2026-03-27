@@ -174,9 +174,10 @@ const BRAND_COLORS: Record<string, { color: string; label: string }> = {
 
 // ─── Components ──────────────────────────────────────────────────
 
-function TrendChart({ data, chart, lang }: { data: PriceRecord[]; chart: ChartDef; lang: "en" | "th" }) {
+function TrendChart({ data, chart, lang, dateRange }: { data: PriceRecord[]; chart: ChartDef; lang: "en" | "th"; dateRange?: [string, string] }) {
 	const filtered = data
 		.filter((d) => chart.metrics.includes(d.metric))
+		.filter((d) => !dateRange || (d.date >= dateRange[0] && d.date <= dateRange[1]))
 		.sort((a, b) => a.date.localeCompare(b.date));
 
 	if (filtered.length < 2) {
@@ -301,6 +302,27 @@ function BrandDieselChart({ data, lang }: { data: PriceRecord[]; lang: "en" | "t
 	);
 }
 
+function getSectionDateRange(data: PriceRecord[], section: StorySection): [string, string] | undefined {
+	const allMetrics = section.charts.flatMap((c) => c.metrics);
+	if (allMetrics.length === 0) return undefined;
+
+	// For each metric, find its date range
+	const ranges: { min: string; max: string }[] = [];
+	for (const metric of allMetrics) {
+		const dates = data.filter((d) => d.metric === metric).map((d) => d.date);
+		if (dates.length > 0) {
+			ranges.push({ min: dates.reduce((a, b) => a < b ? a : b), max: dates.reduce((a, b) => a > b ? a : b) });
+		}
+	}
+	if (ranges.length === 0) return undefined;
+
+	// Use the LATEST start date and EARLIEST end date (intersection)
+	const start = ranges.reduce((a, b) => a.min > b.min ? a : b).min;
+	const end = ranges.reduce((a, b) => a.max < b.max ? a : b).max;
+
+	return start <= end ? [start, end] : undefined;
+}
+
 function SectionHeader({ section, lang }: { section: StorySection; lang: "en" | "th" }) {
 	return (
 		<div className="pt-4">
@@ -379,19 +401,27 @@ export default function TrendsPage() {
 					<>
 						<MetricsSummary data={data} lang={lang} />
 
-						{STORY.map((section) => (
+						{STORY.map((section) => {
+							const dateRange = getSectionDateRange(data, section);
+							return (
 							<div key={section.id} className="space-y-4">
 								<SectionHeader section={section} lang={lang} />
+								{dateRange && (
+									<div className="text-[10px] text-muted-foreground font-mono px-1">
+										{lang === "th" ? "ช่วงเวลา" : "Period"}: {dateRange[0]} -- {dateRange[1]}
+									</div>
+								)}
 
 								{section.charts.map((chart) => (
-									<TrendChart key={chart.title} data={data} chart={chart} lang={lang} />
+									<TrendChart key={chart.title} data={data} chart={chart} lang={lang} dateRange={dateRange} />
 								))}
 
 								{section.id === "brands" && (
 									<BrandDieselChart data={data} lang={lang} />
 								)}
 							</div>
-						))}
+							);
+						})}
 
 						<div className="rounded-xl border border-dashed border-muted-foreground/20 bg-muted/5 p-6 text-center">
 							<p className="text-sm text-muted-foreground">
