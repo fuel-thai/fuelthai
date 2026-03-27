@@ -89,9 +89,9 @@ const STORY: StorySection[] = [
 			{
 				title: "THB/USD EXCHANGE RATE",
 				titleTh: "อัตราแลกเปลี่ยน บาท/ดอลลาร์",
-				subtitle: "Higher = weaker baht = more expensive imports",
-				subtitleTh: "ยิ่งสูง = บาทอ่อน = นำเข้าแพงขึ้น",
-				metrics: ["thb_usd"],
+				subtitle: "Official Bank of Thailand mid rate. Higher = weaker baht.",
+				subtitleTh: "อัตรากลาง ธปท. ยิ่งสูง = บาทอ่อน = นำเข้าแพงขึ้น",
+				metrics: ["thb_usd_bot", "thb_usd"],
 				unit: "THB/USD",
 				color: "#60a5fa",
 				fillColor: "rgba(96,165,250,0.08)",

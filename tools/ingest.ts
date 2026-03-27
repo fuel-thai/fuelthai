@@ -233,9 +233,40 @@ async function collectEfinancePrices(): Promise<Metric[]> {
 	return metrics;
 }
 
+async function collectBotExchangeRate(): Promise<Metric[]> {
+	const key = process.env.BOT_EXCHANGE_KEY;
+	if (!key) { console.log("  [bot] No BOT_EXCHANGE_KEY, skipping"); return []; }
+	console.log("  [bot] Fetching BOT exchange rates...");
+
+	const d = today();
+	const start = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+	const url = `https://gateway.api.bot.or.th/Stat-ExchangeRate/v2/DAILY_AVG_EXG_RATE/?start_period=${start}&end_period=${d}&currency=USD`;
+	const res = await safeFetch(url, { headers: { Authorization: key } });
+	if (!res) { console.log("  [bot] Failed to fetch"); return []; }
+
+	const data = await res.json() as any;
+	const details = data?.result?.data?.data_detail || [];
+	const metrics: Metric[] = [];
+
+	for (const row of details) {
+		if (!row.period || !row.mid_rate) continue;
+		metrics.push({
+			date: row.period,
+			source: "bot",
+			metric: "thb_usd_bot",
+			value: Number(row.mid_rate),
+			unit: "THB/USD",
+		});
+	}
+
+	console.log(`  [bot] Collected ${metrics.length} exchange rate records`);
+	return metrics;
+}
+
 // ─── Main ────────────────────────────────────────────────────────
 
 const collectors: Record<string, () => Promise<Metric[]>> = {
+	bot: collectBotExchangeRate,
 	eppo: collectEppoRetailPrices,
 	fred: collectFredIndices,
 	// wfp: collectWfpFoodPrices, -- data ends at March 2020, too stale
