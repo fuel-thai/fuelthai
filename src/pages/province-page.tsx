@@ -18,6 +18,7 @@ interface Station {
 	name: string;
 	brand_id: string;
 	amphoe: string;
+	amphoe_en: string;
 	lat: number;
 	lon: number;
 	last_diesel_status: string;
@@ -130,7 +131,7 @@ export default function ProvincePage() {
 										<Link to={`/station/${encodeURIComponent(s.id)}` as any} className="font-mono text-sm font-bold text-foreground truncate hover:text-primary hover:underline">{s.name}</Link>
 										<BrandBadge brandId={s.brand_id} />
 									</div>
-									{s.amphoe && <p className="text-[10px] text-muted-foreground mt-0.5">{s.amphoe}</p>}
+									{(s.amphoe || s.amphoe_en) && <p className="text-[10px] text-muted-foreground mt-0.5">{lang === "th" ? s.amphoe : (s.amphoe_en || s.amphoe)}</p>}
 								</div>
 								<span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold ${cfg.text}`}>
 									{lang === "th" ? cfg.label_th : cfg.label_en}

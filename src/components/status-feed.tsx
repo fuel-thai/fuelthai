@@ -15,6 +15,7 @@ interface FeedItem {
 	station_name: string;
 	brand_id: string;
 	amphoe: string;
+	amphoe_en: string;
 	lat: number;
 	lon: number;
 	province_th: string;
@@ -159,7 +160,7 @@ export function StatusFeed({ lang, limit = 30 }: { lang: Lang; limit?: number })
 									</Link>
 								</div>
 								<div className="mt-0.5 flex items-center gap-2 text-[10px] text-muted-foreground">
-									<span>{province}{item.region ? ` -- ${item.region}` : ""}</span>
+									<span>{lang === "th" ? item.amphoe : item.amphoe_en}{(item.amphoe || item.amphoe_en) && province ? ", " : ""}{province}</span>
 									{item.lat && item.lon && <DistanceBadge lat={item.lat} lon={item.lon} />}
 								</div>
 							</div>

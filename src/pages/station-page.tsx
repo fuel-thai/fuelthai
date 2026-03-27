@@ -15,6 +15,7 @@ interface StationDetail {
 	brand_id: string;
 	province_id: number;
 	amphoe: string;
+	amphoe_en: string;
 	lat: number;
 	lon: number;
 	first_seen: string;
@@ -123,8 +124,8 @@ export default function StationPage() {
 									<div className="mt-1 flex items-center gap-2">
 										<BrandBadge brandId={station.brand_id} />
 										<DistanceBadge lat={station.lat} lon={station.lon} />
-										{station.amphoe && (
-											<span className="text-xs text-muted-foreground">{station.amphoe}, {province}</span>
+										{(station.amphoe || station.amphoe_en) && (
+											<span className="text-xs text-muted-foreground">{lang === "th" ? station.amphoe : (station.amphoe_en || station.amphoe)}, {province}</span>
 										)}
 									</div>
 								</div>
@@ -202,7 +203,7 @@ export default function StationPage() {
 								</div>
 								<div>
 									<span className="text-muted-foreground">{lang === "th" ? "อำเภอ" : "District"}</span>
-									<p className="font-mono font-bold text-foreground">{station.amphoe || "--"}</p>
+									<p className="font-mono font-bold text-foreground">{lang === "th" ? station.amphoe : (station.amphoe_en || station.amphoe) || "--"}</p>
 								</div>
 								<div>
 									<span className="text-muted-foreground">{lang === "th" ? "ภูมิภาค" : "Region"}</span>

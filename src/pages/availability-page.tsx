@@ -35,6 +35,7 @@ interface Station {
 	lng: number;
 	province: string;
 	district: string;
+	districtTh: string;
 	verified: boolean;
 	diesel: DieselInfo;
 	fuelStatus: Record<string, string>;
@@ -205,7 +206,7 @@ function StationCard({ station, lang }: { station: Station; lang: "en" | "th" })
 					</div>
 					{station.province && (
 						<p className="mt-0.5 text-xs text-muted-foreground">
-							{station.district}{station.district && station.province ? ", " : ""}{station.province}
+							{lang === "th" ? station.districtTh : station.district}{(station.district || station.districtTh) && station.province ? ", " : ""}{station.province}
 						</p>
 					)}
 				</div>
