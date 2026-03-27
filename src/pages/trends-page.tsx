@@ -79,10 +79,30 @@ const STORY: StorySection[] = [
 		],
 	},
 	{
+		id: "compound",
+		icon: "💥",
+		title: "THE DOUBLE WHAMMY",
+		titleTh: "ผลกระทบทวีคูณ",
+		context: "Oil prices are in USD. When the baht weakens AND crude spikes simultaneously, Thailand gets hit from both sides. This chart shows what Thailand ACTUALLY pays for crude oil in baht -- the compound effect is worse than either metric alone.",
+		contextTh: "ราคาน้ำมันคิดเป็น USD เมื่อบาทอ่อนและน้ำมันดิบพุ่งพร้อมกัน ไทยโดนจากทั้งสองด้าน กราฟนี้แสดงราคาน้ำมันดิบที่ไทยจ่ายจริงเป็นบาท -- ผลกระทบทวีคูณหนักกว่าตัวชี้วัดแต่ละตัว",
+		charts: [
+			{
+				title: "BRENT CRUDE IN THAI BAHT",
+				titleTh: "น้ำมันดิบเบรนท์ (เป็นบาท)",
+				subtitle: "Brent USD x THB/USD = what Thailand actually pays",
+				subtitleTh: "เบรนท์ USD x อัตราแลกเปลี่ยน = ราคาที่ไทยจ่ายจริง",
+				metrics: ["brent_thb"],
+				unit: "THB/bbl",
+				color: "#f43f5e",
+				fillColor: "rgba(244,63,94,0.08)",
+			},
+		],
+	},
+	{
 		id: "currency",
 		icon: "💱",
-		title: "CURRENCY & TRADE",
-		titleTh: "ค่าเงินและการค้า",
+		title: "CURRENCY PRESSURE",
+		titleTh: "แรงกดดันค่าเงิน",
 		context: "Energy imports are priced in USD. As oil prices spike, Thailand's trade deficit widens, putting downward pressure on the baht. A weaker baht makes fuel even more expensive -- a vicious cycle. The Oil Fund (established to stabilize retail prices) is bleeding cash to contain the damage.",
 		contextTh: "การนำเข้าพลังงานคิดราคาเป็น USD เมื่อราคาน้ำมันพุ่ง ขาดดุลการค้าของไทยกว้างขึ้น กดดันค่าเงินบาท บาทอ่อนทำให้น้ำมันแพงขึ้น -- เป็นวงจรอุบาทว์ กองทุนน้ำมัน (ที่ตั้งขึ้นเพื่อรักษาเสถียรภาพราคาปลีก) กำลังขาดทุนหนัก",
 		charts: [

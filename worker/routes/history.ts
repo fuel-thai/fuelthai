@@ -118,7 +118,23 @@ app.get("/api/history/prices",
 		}
 
 		const result = await db.prepare(query).bind(...params).all();
-		return c.json({ data: result.results, count: result.results.length });
+		const data = result.results as any[];
+
+		// Compute virtual metric: brent_thb = brent_crude * thb/usd
+		if (!metric || metric === "brent_thb") {
+			const brentThb = await db.prepare(
+				`SELECT b.date, 'computed' as source, 'brent_thb' as metric,
+					ROUND(b.value * t.value, 2) as value, 'THB/bbl' as unit
+				FROM price_history b
+				JOIN price_history t ON b.date = t.date AND t.metric = 'thb_usd_bot'
+				WHERE b.metric IN ('brent_crude_usd', 'brent_crude_fred')
+				AND b.date >= date('now', '-' || ? || ' days')
+				ORDER BY b.date`,
+			).bind(days).all();
+			data.push(...(brentThb.results as any[]));
+		}
+
+		return c.json({ data, count: data.length });
 	},
 );
 
