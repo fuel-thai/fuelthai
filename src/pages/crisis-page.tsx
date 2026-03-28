@@ -101,7 +101,7 @@ export default function CrisisPage() {
 				</div>
 			</main>
 
-			<SiteFooter text="Built during the 2026 Iran war energy crisis." textTh="สร้างในช่วงวิกฤตพลังงานจากสงครามอิหร่าน 2569" />
+			<SiteFooter />
 		</div>
 	);
 }

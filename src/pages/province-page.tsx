@@ -159,7 +159,7 @@ export default function ProvincePage() {
 				)}
 			</main>
 
-			<SiteFooter text="Data from DOEB Fuel Now" textTh="ข้อมูลจาก DOEB Fuel Now" />
+			<SiteFooter />
 		</div>
 	);
 }

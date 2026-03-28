@@ -180,7 +180,7 @@ export default function StatsPage() {
 
 			</main>
 
-			<SiteFooter text="Market data from FRED, Frankfurter, and thai-oil-api. Built during the 2026 Iran war energy crisis." textTh="ข้อมูลตลาดจาก FRED, Frankfurter, และ thai-oil-api สร้างในช่วงวิกฤตพลังงาน 2569" />
+			<SiteFooter />
 		</div>
 	);
 }

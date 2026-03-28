@@ -168,7 +168,7 @@ export default function StationsPage() {
 				)}
 			</main>
 
-			<SiteFooter text="Station finder powered by PTT Station API. Built during the 2026 Iran war energy crisis." textTh="ค้นหาสถานีจาก PTT Station API สร้างในช่วงวิกฤตพลังงาน 2569" />
+			<SiteFooter />
 		</div>
 	);
 }

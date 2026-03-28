@@ -246,7 +246,7 @@ export default function StationPage() {
 				)}
 			</main>
 
-			<SiteFooter text="Data from DOEB Fuel Now" textTh="ข้อมูลจาก DOEB Fuel Now" />
+			<SiteFooter />
 		</div>
 	);
 }

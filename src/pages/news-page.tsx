@@ -196,7 +196,7 @@ export default function NewsPage() {
 				)}
 			</main>
 
-			<SiteFooter text="Energy news from OilPrice, gCaptain, Natural Gas Intel, Bangkok Post" textTh="ข่าวพลังงานจาก OilPrice, gCaptain, Natural Gas Intel, Bangkok Post" />
+			<SiteFooter />
 		</div>
 	);
 }

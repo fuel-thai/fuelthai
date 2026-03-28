@@ -329,6 +329,36 @@ function BrandDieselChart({ data, lang }: { data: PriceRecord[]; lang: "en" | "t
 
 	const sorted = Object.entries(latestByBrand).sort(([, a], [, b]) => a.value - b.value);
 	const spread = sorted.length > 1 ? sorted[sorted.length - 1][1].value - sorted[0][1].value : 0;
+	const allSamePrice = spread < 0.01;
+	const uniformPrice = sorted[0]?.[1]?.value || 0;
+
+	if (allSamePrice) {
+		return (
+			<div className="rounded-xl border border-border bg-card/50 p-5">
+				<div className="text-center py-4">
+					<div className="font-mono text-3xl font-black text-foreground">฿{uniformPrice.toFixed(2)}</div>
+					<p className="mt-1 text-xs text-muted-foreground">
+						{lang === "th"
+							? `ทุกแบรนด์ (${sorted.length}) ตั้งราคาดีเซล B7 เท่ากัน`
+							: `All ${sorted.length} brands set the same Diesel B7 price`}
+					</p>
+					<div className="mt-3 flex flex-wrap justify-center gap-2">
+						{sorted.map(([metric]) => {
+							const brand = BRAND_COLORS[metric] || { color: "#6b7280", label: metric };
+							return (
+								<span key={metric} className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-mono font-bold" style={{ backgroundColor: `${brand.color}20`, color: brand.color }}>
+									{brand.label}
+								</span>
+							);
+						})}
+					</div>
+				</div>
+				<div className="mt-2 text-[10px] text-muted-foreground font-mono text-center">
+					{sorted[0]?.[1]?.date || ""}
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="rounded-xl border border-border bg-card/50 p-5">
@@ -577,8 +607,8 @@ export default function TrendsPage() {
 						<div className="rounded-xl border border-dashed border-muted-foreground/20 bg-muted/5 p-6 text-center">
 							<p className="text-sm text-muted-foreground">
 								{lang === "th"
-									? "ข้อมูลสะสมทุกวันจาก cron อัตโนมัติ กราฟจะสมบูรณ์ขึ้นเมื่อมีข้อมูลมากขึ้น"
-									: "Data accumulates daily from automated cron. Charts fill in as more data points are captured."
+									? "ข้อมูลถูกรวบรวมอัตโนมัติทุกวัน กราฟจะสมบูรณ์ขึ้นเมื่อมีข้อมูลมากขึ้น"
+									: "Data is collected automatically every day. Charts become more complete as data accumulates."
 								}
 							</p>
 							<p className="mt-1 text-[10px] text-muted-foreground/60">
@@ -592,10 +622,7 @@ export default function TrendsPage() {
 				)}
 			</main>
 
-			<SiteFooter
-				text="Open source crisis data. Built during the 2026 Iran war."
-				textTh="ข้อมูลวิกฤตแบบเปิด สร้างในช่วงสงครามอิหร่าน 2569"
-			/>
+			<SiteFooter />
 		</div>
 	);
 }

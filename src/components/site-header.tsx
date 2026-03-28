@@ -47,6 +47,7 @@ export function SiteHeader({ page, pageTh, subtitle, subtitleTh }: SiteHeaderPro
 					<Link to="/stations" className="font-mono text-xs text-muted-foreground hover:text-foreground">{t("findStations", lang)}</Link>
 					<Link to="/regions" className="font-mono text-xs text-muted-foreground hover:text-foreground">{lang === "th" ? "ภูมิภาค" : "Regions"}</Link>
 					<Link to="/stats" className="font-mono text-xs text-muted-foreground hover:text-foreground">{t("stats", lang)}</Link>
+					<Link to="/trends" className="font-mono text-xs text-muted-foreground hover:text-foreground">{lang === "th" ? "แนวโน้ม" : "Trends"}</Link>
 					<Link to="/news" className="font-mono text-xs text-muted-foreground hover:text-foreground">{lang === "th" ? "ข่าว" : "News"}</Link>
 					<Link to="/feed" className="font-mono text-xs text-muted-foreground hover:text-foreground">{lang === "th" ? "ฟีด" : "Feed"}</Link>
 					<div className="ml-auto"><LanguageToggle /></div>

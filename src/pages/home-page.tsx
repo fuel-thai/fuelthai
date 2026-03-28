@@ -454,7 +454,7 @@ export default function HomePage() {
 				<BrentInfoContent lang={lang} />
 			</InfoModal>
 
-			<SiteFooter text="Real-time Thailand fuel prices via Bangchak API. Built during the 2026 Iran war energy crisis." textTh="ราคาน้ำมันไทยแบบเรียลไทม์จาก Bangchak API สร้างในช่วงวิกฤตพลังงานจากสงครามอิหร่าน 2569" />
+			<SiteFooter />
 		</div>
 	);
 }

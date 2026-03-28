@@ -19,7 +19,7 @@ export default function FeedPage() {
 				<StatusFeed lang={lang} limit={100} />
 			</main>
 
-			<SiteFooter text="Real-time diesel status from DOEB Fuel Now" textTh="สถานะดีเซลแบบเรียลไทม์จาก DOEB Fuel Now" />
+			<SiteFooter />
 		</div>
 	);
 }

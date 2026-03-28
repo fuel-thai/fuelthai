@@ -228,7 +228,7 @@ export default function RegionPage() {
 				)}
 			</main>
 
-			<SiteFooter text="Data from DOEB Fuel Now. Built during the 2026 Iran war energy crisis." textTh="ข้อมูลจาก DOEB Fuel Now สร้างในช่วงวิกฤตพลังงาน 2569" />
+			<SiteFooter />
 		</div>
 	);
 }

@@ -328,7 +328,7 @@ export default function AvailabilityPage() {
 				)}
 			</main>
 
-			<SiteFooter text="Real-time crowdsourced availability via PumpRadar. Built during the 2026 Iran war energy crisis." textTh="สถานะแบบเรียลไทม์จาก PumpRadar สร้างในช่วงวิกฤตพลังงาน 2569" />
+			<SiteFooter />
 		</div>
 	);
 }
