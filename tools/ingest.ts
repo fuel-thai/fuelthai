@@ -263,13 +263,174 @@ async function collectBotExchangeRate(): Promise<Metric[]> {
 	return metrics;
 }
 
+async function collectOilFundLevy(): Promise<Metric[]> {
+	console.log("  [oilfund] Fetching EPPO Oil Fund levy data...");
+	const url = "https://catalog.eppo.go.th/dataset/52571ec1-9f80-489a-9b4d-e8a16e199a2c/resource/c43dfeb0-d0eb-489c-86c7-153c40df72c0/download/dataset_11_56.csv";
+	const res = await safeFetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; FUEL-TH/2.0)" } });
+	if (!res) { console.log("  [oilfund] Failed to fetch"); return []; }
+
+	const text = await res.text();
+	const lines = text.trim().split("\n");
+	const months: Record<string, string> = {
+		january: "01", february: "02", march: "03", april: "04",
+		may: "05", june: "06", july: "07", august: "08",
+		september: "09", october: "10", november: "11", december: "12",
+	};
+	const metrics: Metric[] = [];
+
+	for (let i = 1; i < lines.length; i++) {
+		const cols = lines[i].split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+		if (cols.length < 5) continue;
+		const year = Number(cols[0]);
+		const mm = months[cols[1].toLowerCase().trim()];
+		const product = cols[2].toLowerCase().replace(/\s+/g, "_");
+		const value = Number(cols[3]);
+		if (!year || !mm || Number.isNaN(value)) continue;
+		const ceYear = year > 2500 ? year - 543 : year;
+		if (ceYear < new Date().getFullYear() - 3) continue;
+
+		// Diesel B7 and LSD are the key products
+		if (product.includes("hsd") || product.includes("lsd") || product.includes("diesel")) {
+			metrics.push({ date: `${ceYear}-${mm}-01`, source: "eppo_oilfund", metric: `oilfund_${product}`, value, unit: "THB/L" });
+		}
+	}
+
+	console.log(`  [oilfund] Parsed ${metrics.length} levy records`);
+	return metrics;
+}
+
+async function collectIntlComparison(): Promise<Metric[]> {
+	console.log("  [intl] Fetching EPPO international price comparison...");
+	const url = "https://catalog.eppo.go.th/dataset/b15f2fe3-14f0-4de5-b90e-2a5b63b4e717/resource/7d56918d-adbf-42b7-bd36-e4b33d425027/download/dataset_11_86.csv";
+	const res = await safeFetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; FUEL-TH/2.0)" } });
+	if (!res) { console.log("  [intl] Failed to fetch"); return []; }
+
+	const text = await res.text();
+	const lines = text.trim().split("\n");
+	const months: Record<string, string> = {
+		january: "01", february: "02", march: "03", april: "04",
+		may: "05", june: "06", july: "07", august: "08",
+		september: "09", october: "10", november: "11", december: "12",
+	};
+	const metrics: Metric[] = [];
+
+	// Focus on ASEAN + key comparators for diesel
+	const targetCountries = ["TH-THAILAND", "MY-MALAYSIA", "SG-SINGAPORE", "ID-INDONESIA", "VN-VIETNAM",
+		"PH-PHILIPPINES", "KH-KINGDOM OF CAMBODIA", "MM-MYANMAR", "JP-JAPAN", "US-UNITED STATES"];
+
+	for (let i = 1; i < lines.length; i++) {
+		// Handle quoted fields with commas inside
+		const cols: string[] = [];
+		let inQuote = false;
+		let field = "";
+		for (const ch of lines[i]) {
+			if (ch === '"') { inQuote = !inQuote; continue; }
+			if (ch === "," && !inQuote) { cols.push(field.trim()); field = ""; continue; }
+			field += ch;
+		}
+		cols.push(field.trim());
+
+		if (cols.length < 6) continue;
+		const year = Number(cols[0]);
+		const mm = months[cols[1].toLowerCase().trim()];
+		const item = cols[3];
+		const country = cols[4];
+		const price = Number(cols[5]);
+
+		if (!year || !mm || Number.isNaN(price) || price <= 0) continue;
+		if (!item.includes("HSD")) continue; // Diesel only
+		const ceYear = year > 2500 ? year - 543 : year;
+		if (ceYear < new Date().getFullYear() - 2) continue;
+
+		const matched = targetCountries.find((t) => country.startsWith(t.split("-")[0]));
+		if (!matched) continue;
+		const countryCode = matched.split("-")[0].toLowerCase();
+
+		metrics.push({
+			date: `${ceYear}-${mm}-01`,
+			source: "eppo_intl",
+			metric: `diesel_intl_${countryCode}`,
+			value: price,
+			unit: "THB/L",
+		});
+	}
+
+	console.log(`  [intl] Parsed ${metrics.length} international comparison records`);
+	return metrics;
+}
+
+async function collectSetStocks(): Promise<Metric[]> {
+	console.log("  [set] Fetching SET energy stocks...");
+	const symbols = [
+		{ ticker: "PTT.BK", metric: "stock_ptt", label: "PTT" },
+		{ ticker: "BCP.BK", metric: "stock_bcp", label: "Bangchak" },
+		{ ticker: "TOP.BK", metric: "stock_top", label: "Thai Oil" },
+		{ ticker: "PTTEP.BK", metric: "stock_pttep", label: "PTTEP" },
+	];
+
+	const metrics: Metric[] = [];
+
+	for (const sym of symbols) {
+		const res = await safeFetch(
+			`https://query1.finance.yahoo.com/v8/finance/chart/${sym.ticker}?range=1mo&interval=1d`,
+			{ headers: { "User-Agent": "Mozilla/5.0 (compatible; FUEL-TH/2.0)" } },
+		);
+		if (!res) { console.log(`  [set] Failed to fetch ${sym.ticker}`); continue; }
+
+		const data = await res.json() as any;
+		const result = data?.chart?.result?.[0];
+		if (!result) continue;
+
+		const timestamps = result.timestamp || [];
+		const closes = result.indicators?.quote?.[0]?.close || [];
+
+		for (let i = 0; i < timestamps.length; i++) {
+			if (closes[i] == null) continue;
+			const date = new Date(timestamps[i] * 1000).toISOString().slice(0, 10);
+			metrics.push({ date, source: "yahoo_finance", metric: sym.metric, value: closes[i], unit: "THB" });
+		}
+	}
+
+	console.log(`  [set] Collected ${metrics.length} stock price records`);
+	return metrics;
+}
+
+async function collectNatGas(): Promise<Metric[]> {
+	console.log("  [natgas] Fetching Henry Hub natural gas...");
+	const res = await safeFetch(
+		"https://query1.finance.yahoo.com/v8/finance/chart/NG=F?range=1mo&interval=1d",
+		{ headers: { "User-Agent": "Mozilla/5.0 (compatible; FUEL-TH/2.0)" } },
+	);
+	if (!res) { console.log("  [natgas] Failed to fetch"); return []; }
+
+	const data = await res.json() as any;
+	const result = data?.chart?.result?.[0];
+	if (!result) return [];
+
+	const timestamps = result.timestamp || [];
+	const closes = result.indicators?.quote?.[0]?.close || [];
+	const metrics: Metric[] = [];
+
+	for (let i = 0; i < timestamps.length; i++) {
+		if (closes[i] == null) continue;
+		const date = new Date(timestamps[i] * 1000).toISOString().slice(0, 10);
+		metrics.push({ date, source: "yahoo_finance", metric: "natgas_henry_hub", value: closes[i], unit: "USD/MMBtu" });
+	}
+
+	console.log(`  [natgas] Collected ${metrics.length} natural gas prices`);
+	return metrics;
+}
+
 // ─── Main ────────────────────────────────────────────────────────
 
 const collectors: Record<string, () => Promise<Metric[]>> = {
 	bot: collectBotExchangeRate,
 	eppo: collectEppoRetailPrices,
+	oilfund: collectOilFundLevy,
+	intl: collectIntlComparison,
+	set: collectSetStocks,
+	natgas: collectNatGas,
 	fred: collectFredIndices,
-	// wfp: collectWfpFoodPrices, -- data ends at March 2020, too stale
 	efinance: collectEfinancePrices,
 };
 

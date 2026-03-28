@@ -120,13 +120,43 @@ const STORY: StorySection[] = [
 		],
 	},
 	{
+		id: "electricity",
+		icon: "⚡",
+		title: "ELECTRICITY RISK",
+		titleTh: "ความเสี่ยงค่าไฟ",
+		context: "Thailand generates 67% of its electricity from natural gas. Henry Hub is the global benchmark -- when gas prices rise, Thai power bills follow within 3-6 months. The war has disrupted LNG supply chains worldwide.",
+		contextTh: "ไทยผลิตไฟฟ้า 67% จากก๊าซธรรมชาติ Henry Hub เป็นราคาอ้างอิงโลก -- เมื่อราคาก๊าซขึ้น ค่าไฟไทยจะตามภายใน 3-6 เดือน สงครามทำให้ห่วงโซ่อุปทาน LNG ทั่วโลกหยุดชะงัก",
+		charts: [
+			{
+				title: "NATURAL GAS (HENRY HUB)",
+				titleTh: "ก๊าซธรรมชาติ (Henry Hub)",
+				subtitle: "Global benchmark -- drives Thai electricity costs",
+				subtitleTh: "ราคาอ้างอิงโลก -- กำหนดต้นทุนไฟฟ้าของไทย",
+				metrics: ["natgas_henry_hub"],
+				unit: "USD/MMBtu",
+				color: "#38bdf8",
+				fillColor: "rgba(56,189,248,0.08)",
+			},
+		],
+	},
+	{
 		id: "supply-chain",
 		icon: "🏭",
-		title: "SUPPLY CHAIN INDICATORS",
-		titleTh: "ตัวชี้วัดห่วงโซ่อุปทาน",
-		context: "Thailand imports plastic pellets and fertilizer from Iran -- the government is now negotiating food-for-plastics barter deals to bypass sanctions. These US producer price indices track global manufacturing costs for the same commodities. When these indices rise, Thai import costs follow.",
-		contextTh: "ไทยนำเข้าเม็ดพลาสติกและปุ๋ยจากอิหร่าน -- รัฐบาลกำลังเจรจาแลกเปลี่ยนอาหารกับพลาสติกเพื่อหลีกเลี่ยงมาตรการคว่ำบาตร ดัชนี PPI สหรัฐเหล่านี้ติดตามต้นทุนการผลิตโลก เมื่อดัชนีเหล่านี้ขึ้น ต้นทุนนำเข้าของไทยก็ขึ้นตาม",
+		title: "SUPPLY CHAIN & BARTER",
+		titleTh: "ห่วงโซ่อุปทานและการแลกเปลี่ยน",
+		context: "Thailand imports plastic pellets and fertilizer from Iran -- the government is now negotiating food-for-plastics barter deals to bypass sanctions. These US producer price indices track global manufacturing costs for the same commodities. When these indices rise, Thai import costs follow. The Oil Fund levy shows how much the government is subsidizing each litre.",
+		contextTh: "ไทยนำเข้าเม็ดพลาสติกและปุ๋ยจากอิหร่าน -- รัฐบาลกำลังเจรจาแลกเปลี่ยนอาหารกับพลาสติก ดัชนี PPI สหรัฐติดตามต้นทุนโลก กองทุนน้ำมันแสดงว่ารัฐบาลอุดหนุนเท่าไรต่อลิตร",
 		charts: [
+			{
+				title: "OIL FUND LEVY (DIESEL)",
+				titleTh: "เงินส่งเข้ากองทุนน้ำมัน (ดีเซล)",
+				subtitle: "EPPO -- negative = government paying subsidy per litre",
+				subtitleTh: "สนพ. -- ติดลบ = รัฐจ่ายเงินอุดหนุนต่อลิตร",
+				metrics: ["oilfund_hsd_(b7)", "oilfund_hsd_b7", "oilfund_lsd"],
+				unit: "THB/L",
+				color: "#fbbf24",
+				fillColor: "rgba(251,191,36,0.08)",
+			},
 			{
 				title: "FERTILIZER COST INDEX",
 				titleTh: "ดัชนีต้นทุนปุ๋ย",
@@ -134,14 +164,14 @@ const STORY: StorySection[] = [
 				subtitleTh: "ตัวชี้วัดโลก -- PPI การผลิตปุ๋ยสหรัฐ (FRED)",
 				metrics: ["fertilizer_ppi"],
 				unit: "Index",
-				color: "#fbbf24",
-				fillColor: "rgba(251,191,36,0.08)",
+				color: "#a3e635",
+				fillColor: "rgba(163,230,53,0.08)",
 			},
 			{
 				title: "PLASTIC RESINS COST INDEX",
 				titleTh: "ดัชนีต้นทุนเม็ดพลาสติก",
-				subtitle: "Global indicator -- US plastic resins PPI (FRED)",
-				subtitleTh: "ตัวชี้วัดโลก -- PPI เม็ดพลาสติกสหรัฐ (FRED)",
+				subtitle: "Global indicator -- US plastic resins PPI (FRED). Thailand imports pellets from Iran.",
+				subtitleTh: "ตัวชี้วัดโลก -- PPI เม็ดพลาสติกสหรัฐ (FRED) ไทยนำเข้าจากอิหร่าน",
 				metrics: ["plastic_resins_ppi"],
 				unit: "Index",
 				color: "#fb923c",
@@ -150,12 +180,52 @@ const STORY: StorySection[] = [
 		],
 	},
 	{
+		id: "market",
+		icon: "📉",
+		title: "MARKET CONFIDENCE",
+		titleTh: "ความเชื่อมั่นตลาด",
+		context: "Thai energy stocks are a real-time barometer. PTT (state oil company) and PTTEP (exploration) are the bellwethers. When investors lose confidence in the energy sector, these stocks drop -- signaling expectations of prolonged disruption.",
+		contextTh: "หุ้นพลังงานไทยเป็นตัวชี้วัดแบบเรียลไทม์ PTT (บริษัทน้ำมันรัฐ) และ PTTEP (สำรวจ) เป็นหุ้นนำ เมื่อนักลงทุนขาดความเชื่อมั่น หุ้นเหล่านี้จะร่วง -- ส่งสัญญาณว่าวิกฤตจะยืดเยื้อ",
+		charts: [
+			{
+				title: "PTT PCL",
+				titleTh: "บมจ. ปตท.",
+				subtitle: "Thailand's state oil company -- SET:PTT",
+				subtitleTh: "บริษัทน้ำมันแห่งชาติ -- SET:PTT",
+				metrics: ["stock_ptt"],
+				unit: "THB",
+				color: "#eab308",
+				fillColor: "rgba(234,179,8,0.08)",
+			},
+			{
+				title: "PTTEP",
+				titleTh: "ปตท.สผ.",
+				subtitle: "PTT Exploration & Production -- SET:PTTEP",
+				subtitleTh: "ปตท. สำรวจและผลิตปิโตรเลียม -- SET:PTTEP",
+				metrics: ["stock_pttep"],
+				unit: "THB",
+				color: "#22d3ee",
+				fillColor: "rgba(34,211,238,0.08)",
+			},
+			{
+				title: "BANGCHAK (BCP)",
+				titleTh: "บางจาก (BCP)",
+				subtitle: "Major refiner & retailer -- SET:BCP",
+				subtitleTh: "ผู้กลั่นและผู้ค้าปลีกรายใหญ่ -- SET:BCP",
+				metrics: ["stock_bcp"],
+				unit: "THB",
+				color: "#22c55e",
+				fillColor: "rgba(34,197,94,0.08)",
+			},
+		],
+	},
+	{
 		id: "brands",
 		icon: "⛽",
 		title: "DIESEL PRICES BY BRAND",
 		titleTh: "ราคาดีเซลรายแบรนด์",
-		context: "Different brands set different prices based on their supply chains and subsidy strategies. The spread between cheapest and most expensive tells you how fragmented the market has become.",
-		contextTh: "แต่ละแบรนด์ตั้งราคาต่างกันตามห่วงโซ่อุปทานและกลยุทธ์การอุดหนุน ส่วนต่างระหว่างถูกสุดและแพงสุดบอกว่าตลาดแตกแยกแค่ไหน",
+		context: "Different brands set different prices based on their supply chains and subsidy strategies. The spread between cheapest and most expensive tells you how fragmented the market has become under crisis pressure.",
+		contextTh: "แต่ละแบรนด์ตั้งราคาต่างกันตามห่วงโซ่อุปทานและกลยุทธ์การอุดหนุน ส่วนต่างระหว่างถูกสุดและแพงสุดบอกว่าตลาดแตกแยกแค่ไหนภายใต้แรงกดดันวิกฤต",
 		charts: [],
 	},
 ];
@@ -323,6 +393,83 @@ function getSectionDateRange(data: PriceRecord[], section: StorySection): [strin
 	return start <= end ? [start, end] : undefined;
 }
 
+const COUNTRY_LABELS: Record<string, { en: string; th: string; flag: string }> = {
+	th: { en: "Thailand", th: "ไทย", flag: "🇹🇭" },
+	my: { en: "Malaysia", th: "มาเลเซีย", flag: "🇲🇾" },
+	sg: { en: "Singapore", th: "สิงคโปร์", flag: "🇸🇬" },
+	id: { en: "Indonesia", th: "อินโดนีเซีย", flag: "🇮🇩" },
+	vn: { en: "Vietnam", th: "เวียดนาม", flag: "🇻🇳" },
+	ph: { en: "Philippines", th: "ฟิลิปปินส์", flag: "🇵🇭" },
+	kh: { en: "Cambodia", th: "กัมพูชา", flag: "🇰🇭" },
+	mm: { en: "Myanmar", th: "เมียนมา", flag: "🇲🇲" },
+	jp: { en: "Japan", th: "ญี่ปุ่น", flag: "🇯🇵" },
+	us: { en: "USA", th: "สหรัฐ", flag: "🇺🇸" },
+};
+
+function IntlDieselChart({ data, lang }: { data: PriceRecord[]; lang: "en" | "th" }) {
+	const intlData = data.filter((d) => d.metric.startsWith("diesel_intl_"));
+	if (intlData.length === 0) return null;
+
+	// Get latest price per country
+	const latestByCountry: Record<string, PriceRecord> = {};
+	for (const d of intlData) {
+		const code = d.metric.replace("diesel_intl_", "");
+		if (!latestByCountry[code] || d.date > latestByCountry[code].date) {
+			latestByCountry[code] = d;
+		}
+	}
+
+	const sorted = Object.entries(latestByCountry).sort(([, a], [, b]) => a.value - b.value);
+	const maxPrice = Math.max(...sorted.map(([, r]) => r.value));
+	const thPrice = latestByCountry["th"]?.value;
+
+	return (
+		<div className="rounded-xl border border-border bg-card/50 p-5">
+			<div className="mb-4">
+				<h3 className="font-mono text-xs font-bold text-foreground uppercase tracking-wider">
+					{lang === "th" ? "เปรียบเทียบราคาดีเซลในภูมิภาค" : "REGIONAL DIESEL PRICE COMPARISON"}
+				</h3>
+				<p className="text-[10px] text-muted-foreground">
+					{lang === "th" ? "ราคาดีเซล B7 เป็นบาท/ลิตร จาก สนพ." : "Diesel B7 in THB/L from EPPO. Shows where Thailand sits vs neighbors."}
+				</p>
+			</div>
+
+			<div className="space-y-1.5">
+				{sorted.map(([code, record]) => {
+					const country = COUNTRY_LABELS[code] || { en: code.toUpperCase(), th: code.toUpperCase(), flag: "" };
+					const pct = (record.value / maxPrice) * 100;
+					const isTh = code === "th";
+					const barColor = isTh ? "rgba(251,191,36,0.6)" : "rgba(255,255,255,0.1)";
+
+					return (
+						<div key={code} className={`flex items-center gap-2 ${isTh ? "bg-amber-500/10 rounded px-1 py-0.5 -mx-1" : ""}`}>
+							<span className="w-5 text-center text-sm">{country.flag}</span>
+							<span className={`w-20 shrink-0 text-right font-mono text-xs ${isTh ? "font-black text-amber-400" : "text-foreground"}`}>
+								{lang === "th" ? country.th : country.en}
+							</span>
+							<div className="flex-1 h-5 rounded bg-muted/20 overflow-hidden relative">
+								<div className="h-full rounded" style={{ width: `${pct}%`, backgroundColor: barColor }} />
+								<span className={`absolute inset-y-0 right-2 flex items-center font-mono text-[10px] ${isTh ? "font-bold text-amber-400" : "text-muted-foreground"}`}>
+									{record.value.toFixed(2)}
+								</span>
+							</div>
+							{thPrice && !isTh && (
+								<span className={`w-14 text-right font-mono text-[10px] ${record.value < thPrice ? "text-emerald-400" : "text-red-400"}`}>
+									{record.value < thPrice ? "" : "+"}{((record.value / thPrice - 1) * 100).toFixed(0)}%
+								</span>
+							)}
+						</div>
+					);
+				})}
+			</div>
+
+			<div className="mt-2 text-[10px] text-muted-foreground font-mono">
+				{sorted[0]?.[1]?.date || ""} | {lang === "th" ? "ที่มา: สนพ." : "Source: EPPO"}
+			</div>
+		</div>
+	);
+}
+
 function SectionHeader({ section, lang }: { section: StorySection; lang: "en" | "th" }) {
 	return (
 		<div className="pt-4">
@@ -415,6 +562,10 @@ export default function TrendsPage() {
 								{section.charts.map((chart) => (
 									<TrendChart key={chart.title} data={data} chart={chart} lang={lang} dateRange={dateRange} />
 								))}
+
+								{section.id === "energy" && (
+									<IntlDieselChart data={data} lang={lang} />
+								)}
 
 								{section.id === "brands" && (
 									<BrandDieselChart data={data} lang={lang} />
