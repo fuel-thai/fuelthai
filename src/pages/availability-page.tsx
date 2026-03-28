@@ -321,7 +321,7 @@ export default function AvailabilityPage() {
 						<div className="rounded-lg border border-border bg-card p-4">
 							<div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
 								<span>{t("source", lang)}: {data.source}</span>
-								<span>fuel.lanta.dev</span>
+								<span>fuelthai.com</span>
 							</div>
 						</div>
 					</div>

@@ -89,8 +89,8 @@ function FuelCard({ fuel, lang }: { fuel: FuelPrice; lang: "en" | "th" }) {
 					</div>
 				</div>
 				<div className="text-right">
-					{isUp && <span className="text-xs text-destructive">UP</span>}
-					{isDown && <span className="text-xs text-primary">DOWN</span>}
+					{isUp && <span className="text-xs text-destructive">{lang === "th" ? "ขึ้น" : "UP"}</span>}
+					{isDown && <span className="text-xs text-primary">{lang === "th" ? "ลง" : "DOWN"}</span>}
 					{fuel.yesterday && (
 						<div className="mt-1">
 							<PriceChange value={price - fuel.yesterday} />
@@ -347,14 +347,14 @@ export default function HomePage() {
 								<div key={brand.id} className={`rounded-lg border px-3 py-2 ${i === 0 ? "border-emerald-500/40 bg-emerald-500/5" : "border-border"}`}>
 									<span className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold text-muted-foreground uppercase">
 										<img src={`/brands/${brand.id.toLowerCase()}.svg`} alt="" className="h-4 w-4" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-										{brand.id}
+										{brand.name || brand.id}
 									</span>
 									<div className="font-mono text-lg font-black text-foreground">{brand.diesel?.toFixed(2)}</div>
 									{i === 0 && <span className="text-[10px] text-emerald-400">{t("cheapest", lang)}</span>}
 								</div>
 							))}
 						</div>
-						<div className="mt-2 text-[10px] text-muted-foreground">{t("source", lang)}: thai-oil-api</div>
+						<div className="mt-2 text-[10px] text-muted-foreground">{t("source", lang)}: {lang === "th" ? "Thai Oil Price" : "Thai Oil Price"}</div>
 					</div>
 				)}
 
@@ -423,32 +423,13 @@ export default function HomePage() {
 						<p>{t("contextP2", lang)}</p>
 					</div>
 					<div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
-						<span>{t("source", lang)}: {data?.source || "Bangchak API"}</span>
+						<span>{t("source", lang)}: {data?.source || (lang === "th" ? "บางจาก" : "Bangchak")}</span>
 						<span>{t("updated", lang)}: {lastFetch?.toLocaleTimeString(lang === "th" ? "th-TH" : "en-GB") || "--"}</span>
-						<span>fuel.lanta.dev</span>
+						<span>fuelthai.com</span>
 					</div>
 				</div>
 
-				<div className="mt-6 rounded-lg border border-border bg-card p-4">
-					<h3 className="font-mono text-xs font-bold text-muted-foreground uppercase tracking-wider">
-						{t("api", lang)}
-					</h3>
-					<div className="mt-3 space-y-2 font-mono text-xs">
-						<div className="rounded bg-muted px-3 py-2">
-							<span className="text-primary">GET</span> /api/prices
-						</div>
-						<div className="rounded bg-muted px-3 py-2">
-							<span className="text-primary">GET</span> /api/diesel
-						</div>
-						<div className="rounded bg-muted px-3 py-2">
-							<span className="text-primary">GET</span> /api/prices/th
-						</div>
-						<div className="rounded bg-muted px-3 py-2">
-							<span className="text-primary">GET</span> /api/stations?postal=81150
-						</div>
-					</div>
-				</div>
-			</main>
+				</main>
 
 			<InfoModal open={showBrentInfo} onClose={() => setShowBrentInfo(false)} title={t("brentCrude", lang)}>
 				<BrentInfoContent lang={lang} />

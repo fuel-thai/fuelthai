@@ -183,7 +183,7 @@ export function StationCard({ station, lang, showConfidence = false, showSourceB
 					)}
 					{station.diesel.restock && (
 						<span className="text-sm text-blue-400">
-							Restock: {station.diesel.restock}
+							{lang === "th" ? "เติม:" : "Restock:"} {station.diesel.restock}
 						</span>
 					)}
 				</div>

@@ -92,9 +92,9 @@ function ProvinceRow({ p, lang }: { p: ProvinceStats; lang: "en" | "th" }) {
 
 			{/* Numbers row */}
 			<div className="mt-1.5 flex flex-wrap gap-3 text-[10px] font-mono">
-				{p.diesel_available > 0 && <span className="text-emerald-400">{p.diesel_available} {lang === "th" ? "มี" : "avail"}</span>}
-				{p.diesel_limited > 0 && <span className="text-amber-400">{p.diesel_limited} {lang === "th" ? "จำกัด" : "ltd"}</span>}
-				{p.diesel_pending > 0 && <span className="text-blue-400">{p.diesel_pending} {lang === "th" ? "รอ" : "pend"}</span>}
+				{p.diesel_available > 0 && <span className="text-emerald-400">{p.diesel_available} {lang === "th" ? "มี" : "available"}</span>}
+				{p.diesel_limited > 0 && <span className="text-amber-400">{p.diesel_limited} {lang === "th" ? "จำกัด" : "limited"}</span>}
+				{p.diesel_pending > 0 && <span className="text-blue-400">{p.diesel_pending} {lang === "th" ? "รอ" : "pending"}</span>}
 				{p.diesel_out > 0 && <span className="text-red-400">{p.diesel_out} {lang === "th" ? "หมด" : "out"}</span>}
 			</div>
 		</div>
@@ -137,7 +137,7 @@ export default function RegionPage() {
 
 	return (
 		<div className="min-h-screen bg-background">
-			<SiteHeader page="REGIONS" pageTh="ภูมิภาค" subtitle="Province-level diesel status -- data from DOEB Fuel Now" subtitleTh="สถานะดีเซลรายจังหวัด -- ข้อมูลจาก DOEB Fuel Now" />
+			<SiteHeader page="REGIONS" pageTh="ภูมิภาค" subtitle="Province-level diesel status -- Department of Energy Business" subtitleTh="สถานะดีเซลรายจังหวัด -- กรมธุรกิจพลังงาน" />
 
 			<main className="mx-auto max-w-4xl px-4 py-6 space-y-6">
 				{loading && (

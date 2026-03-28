@@ -22,7 +22,7 @@ const translations = {
 	heroTitle: { en: "IS THERE DIESEL NEAR YOU?", th: "มีดีเซลใกล้คุณหรือไม่?" },
 	heroSubtitle: { en: "Real-time availability -- check before you drive", th: "ตรวจสอบสถานะแบบเรียลไทม์ -- เช็คก่อนขับ" },
 	checkNow: { en: "CHECK NOW", th: "เช็คเลย" },
-	livePrices: { en: "Thailand fuel prices -- live from Bangchak API", th: "ราคาน้ำมันไทย -- สดจาก Bangchak API" },
+	livePrices: { en: "Thailand fuel prices -- live from Bangchak", th: "ราคาน้ำมันไทย -- สดจากบางจาก" },
 	dieselB7: { en: "DIESEL B7", th: "ดีเซล B7" },
 	primaryFuel: { en: "Primary fuel -- crisis monitoring", th: "น้ำมันหลัก -- เฝ้าระวังวิกฤต" },
 	thbPerLiter: { en: "THB/L", th: "บาท/ลิตร" },
@@ -75,7 +75,7 @@ const translations = {
 	noData: { en: "NO DATA", th: "ไม่มีข้อมูล" },
 
 	// ─── Stations page ───────────────────────────────────────────
-	stationsSubtitle: { en: "Find nearby fuel stations -- PTT network", th: "ค้นหาสถานีน้ำมันใกล้เคียง -- เครือ PTT" },
+	stationsSubtitle: { en: "Find nearby fuel stations -- all brands", th: "ค้นหาสถานีน้ำมันใกล้เคียง -- ทุกแบรนด์" },
 	searching: { en: "Searching...", th: "กำลังค้นหา..." },
 	gettingLocation: { en: "Getting your location...", th: "กำลังหาตำแหน่ง..." },
 	findingStations: { en: "Finding stations...", th: "กำลังค้นหาสถานี..." },
@@ -87,7 +87,7 @@ const translations = {
 	noStationsFound: { en: "No stations found within {radius}km.", th: "ไม่พบสถานีในรัศมี {radius} กม." },
 	tryDifferent: { en: "Try a different postal code or increase the search radius.", th: "ลองรหัสไปรษณีย์อื่นหรือเพิ่มรัศมีการค้นหา" },
 	enterPostalStations: { en: "Enter a postal code or use your location to find nearby fuel stations.", th: "กรอกรหัสไปรษณีย์หรือใช้ตำแหน่งเพื่อค้นหาสถานีน้ำมันใกล้เคียง" },
-	pttNetwork: { en: "PTT station network -- diesel availability highlighted during crisis.", th: "เครือสถานี PTT -- เน้นสถานะดีเซลในช่วงวิกฤต" },
+	pttNetwork: { en: "All brands -- diesel availability highlighted during crisis.", th: "ทุกแบรนด์ -- เน้นสถานะดีเซลในช่วงวิกฤต" },
 	selfServe: { en: "SELF-SERVE", th: "เติมเอง" },
 	checkDieselCta: { en: "Check Diesel", th: "เช็คดีเซล" },
 	byPostalCode: { en: "by postal code", th: "ตามรหัสไปรษณีย์" },
@@ -139,13 +139,13 @@ const translations = {
 	dieselByBrandSub: { en: "Current pump prices across all Thai fuel brands", th: "ราคาหน้าปั๊มปัจจุบันทุกแบรนด์ในไทย" },
 	loadingData: { en: "Loading market data...", th: "กำลังโหลดข้อมูลตลาด..." },
 	dataUnavailable: { en: "Data temporarily unavailable", th: "ข้อมูลไม่พร้อมใช้ชั่วคราว" },
-	footerStats: { en: "FUEL::TH / STATS -- Market data from FRED, Frankfurter, and thai-oil-api. Built during the 2026 Iran war energy crisis.", th: "FUEL::TH / สถิติ -- ข้อมูลตลาดจาก FRED, Frankfurter, และ thai-oil-api สร้างในช่วงวิกฤตพลังงาน 2569" },
+	footerStats: { en: "FUEL::TH / STATS -- Market data from FRED, Frankfurter, and Thai Oil Price. Built during the 2026 Iran war energy crisis.", th: "FUEL::TH / สถิติ -- ข้อมูลตลาดจาก FRED, Frankfurter, และ Thai Oil Price สร้างในช่วงวิกฤตพลังงาน 2569" },
 
 	// ─── Footer ──────────────────────────────────────────────────
 	contact: { en: "fuel@lanta.dev", th: "fuel@lanta.dev" },
-	footerHome: { en: "FUEL::TH -- Real-time Thailand fuel prices via Bangchak API. Built during the 2026 Iran war energy crisis.", th: "FUEL::TH -- ราคาน้ำมันไทยแบบเรียลไทม์จาก Bangchak API สร้างในช่วงวิกฤตพลังงานจากสงครามอิหร่าน 2569" },
+	footerHome: { en: "FUEL::TH -- Real-time Thailand fuel prices via Bangchak. Built during the 2026 Iran war energy crisis.", th: "FUEL::TH -- ราคาน้ำมันไทยแบบเรียลไทม์จากบางจาก สร้างในช่วงวิกฤตพลังงานจากสงครามอิหร่าน 2569" },
 	footerAvail: { en: "FUEL::TH / DIESEL CHECK -- Real-time crowdsourced availability via PumpRadar. Built during the 2026 Iran war energy crisis.", th: "FUEL::TH / เช็คดีเซล -- สถานะแบบเรียลไทม์จาก PumpRadar สร้างในช่วงวิกฤตพลังงาน 2569" },
-	footerStations: { en: "FUEL::TH -- Station finder powered by PTT Station API. Built during the 2026 Iran war energy crisis.", th: "FUEL::TH -- ค้นหาสถานีจาก PTT Station API สร้างในช่วงวิกฤตพลังงาน 2569" },
+	footerStations: { en: "FUEL::TH -- Station finder for all brands. Built during the 2026 Iran war energy crisis.", th: "FUEL::TH -- ค้นหาสถานีทุกแบรนด์ สร้างในช่วงวิกฤตพลังงาน 2569" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

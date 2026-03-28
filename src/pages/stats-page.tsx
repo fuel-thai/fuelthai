@@ -45,7 +45,7 @@ export default function StatsPage() {
 	const crudeChartData = crude?.observations.map((o) => ({ label: o.date, value: o.price })) || [];
 	const brandsWithDiesel = brands?.brands.filter((b) => b.diesel != null) || [];
 	const brandsNoDiesel = brands?.brands.filter((b) => b.diesel == null) || [];
-	const brandBars = brandsWithDiesel.map((b, i) => ({ label: b.id.slice(0, 6), value: b.diesel as number, highlight: i === 0 }));
+	const brandBars = brandsWithDiesel.map((b, i) => ({ label: (b.name || b.id).slice(0, 8), value: b.diesel as number, highlight: i === 0 }));
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -85,7 +85,7 @@ export default function StatsPage() {
 						<div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground font-mono">
 							<span>{t("high", lang)}: ${crude.high.toFixed(2)}</span>
 							<span>{t("low", lang)}: ${crude.low.toFixed(2)}</span>
-							{crude.latest && <span>Latest: {crude.latest.date}</span>}
+							{crude.latest && <span>{lang === "th" ? "ล่าสุด" : "Latest"}: {crude.latest.date}</span>}
 						</div>
 						<div className="mt-2 text-[10px] text-muted-foreground">{t("source", lang)}: {crude.source}</div>
 					</div>
@@ -128,10 +128,10 @@ export default function StatsPage() {
 							<table className="w-full text-xs">
 								<thead>
 									<tr className="bg-muted/50">
-										<th className="text-left px-3 py-2 font-mono font-bold text-muted-foreground">Brand</th>
-										<th className="text-right px-3 py-2 font-mono font-bold text-muted-foreground">Diesel B7</th>
-										<th className="text-right px-3 py-2 font-mono font-bold text-muted-foreground hidden sm:table-cell">G95</th>
-										<th className="text-right px-3 py-2 font-mono font-bold text-muted-foreground hidden sm:table-cell">G91</th>
+										<th className="text-left px-3 py-2 font-mono font-bold text-muted-foreground">{lang === "th" ? "แบรนด์" : "Brand"}</th>
+										<th className="text-right px-3 py-2 font-mono font-bold text-muted-foreground">{lang === "th" ? "ดีเซล B7" : "Diesel B7"}</th>
+										<th className="text-right px-3 py-2 font-mono font-bold text-muted-foreground hidden sm:table-cell">{lang === "th" ? "แก๊สโซฮอล์ 95" : "G95"}</th>
+										<th className="text-right px-3 py-2 font-mono font-bold text-muted-foreground hidden sm:table-cell">{lang === "th" ? "แก๊สโซฮอล์ 91" : "G91"}</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -140,7 +140,7 @@ export default function StatsPage() {
 											<td className="px-3 py-2 font-mono font-bold text-foreground">
 												<span className="inline-flex items-center gap-2">
 													<img src={`/brands/${brand.id.toLowerCase()}.svg`} alt="" className="h-5 w-5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-													{brand.id}
+													{brand.name || brand.id}
 												</span>
 												{i === 0 && <span className="ml-2 text-[10px] text-emerald-400">{t("cheapest", lang)}</span>}
 											</td>

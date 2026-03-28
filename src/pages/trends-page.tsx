@@ -257,7 +257,7 @@ function TrendChart({ data, chart, lang, dateRange }: { data: PriceRecord[]; cha
 					{lang === "th" ? chart.titleTh : chart.title}
 				</h3>
 				<p className="mt-2 text-xs text-muted-foreground">
-					{lang === "th" ? "ยังไม่มีข้อมูลเพียงพอ -- ข้อมูลจะสะสมทุกวัน" : "Not enough data yet -- accumulates daily from cron"}
+					{lang === "th" ? "ยังไม่มีข้อมูลเพียงพอ -- ข้อมูลจะสะสมทุกวัน" : "Not enough data yet -- data is collected daily"}
 				</p>
 			</div>
 		);
@@ -299,7 +299,7 @@ function TrendChart({ data, chart, lang, dateRange }: { data: PriceRecord[]; cha
 				yLabel={chart.unit}
 			/>
 			<div className="mt-2 flex gap-4 text-[10px] text-muted-foreground font-mono">
-				<span>{filtered.length} pts</span>
+				<span>{filtered.length} {lang === "th" ? "จุดข้อมูล" : "data points"}</span>
 				<span>{first.date} -- {latest.date}</span>
 			</div>
 		</div>
@@ -613,8 +613,8 @@ export default function TrendsPage() {
 							</p>
 							<p className="mt-1 text-[10px] text-muted-foreground/60">
 								{lang === "th"
-									? "แหล่งข้อมูล: สนพ., FRED, Yahoo Finance, Frankfurter, thai-oil-api, efinancethai"
-									: "Sources: EPPO, FRED, Yahoo Finance, Frankfurter, thai-oil-api, efinancethai"
+									? "แหล่งข้อมูล: สนพ., FRED, Yahoo Finance, Frankfurter, Thai Oil Price, efinancethai"
+									: "Sources: EPPO, FRED, Yahoo Finance, Frankfurter, Thai Oil Price, efinancethai"
 								}
 							</p>
 						</div>
