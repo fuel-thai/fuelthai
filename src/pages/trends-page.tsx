@@ -403,22 +403,25 @@ function BrandDieselChart({ data, lang }: { data: PriceRecord[]; lang: "en" | "t
 }
 
 function getSectionDateRange(data: PriceRecord[], section: StorySection): [string, string] | undefined {
-	const allMetrics = section.charts.flatMap((c) => c.metrics);
-	if (allMetrics.length === 0) return undefined;
+	if (section.charts.length === 0) return undefined;
 
-	// For each metric, find its date range
-	const ranges: { min: string; max: string }[] = [];
-	for (const metric of allMetrics) {
-		const dates = data.filter((d) => d.metric === metric).map((d) => d.date);
+	// Per chart: union of all its metrics' date ranges (a chart's metrics are alternatives, not separate series)
+	const chartRanges: { min: string; max: string }[] = [];
+	for (const chart of section.charts) {
+		const dates = data.filter((d) => chart.metrics.includes(d.metric)).map((d) => d.date);
 		if (dates.length > 0) {
-			ranges.push({ min: dates.reduce((a, b) => a < b ? a : b), max: dates.reduce((a, b) => a > b ? a : b) });
+			chartRanges.push({
+				min: dates.reduce((a, b) => a < b ? a : b),
+				max: dates.reduce((a, b) => a > b ? a : b),
+			});
 		}
 	}
-	if (ranges.length === 0) return undefined;
+	if (chartRanges.length === 0) return undefined;
 
-	// Use the LATEST start date and EARLIEST end date (intersection)
-	const start = ranges.reduce((a, b) => a.min > b.min ? a : b).min;
-	const end = ranges.reduce((a, b) => a.max < b.max ? a : b).max;
+	// Across charts: intersect so all charts in the section show the same window
+	if (chartRanges.length === 1) return [chartRanges[0].min, chartRanges[0].max];
+	const start = chartRanges.reduce((a, b) => a.min > b.min ? a : b).min;
+	const end = chartRanges.reduce((a, b) => a.max < b.max ? a : b).max;
 
 	return start <= end ? [start, end] : undefined;
 }
