@@ -165,7 +165,7 @@ app.get("/api/prices/th", cache({ cacheName: "prices-th", cacheControl: "public,
 
 app.get(
 	"/api/brand-prices",
-	cache({ cacheName: "brand-prices-v5", cacheControl: "public, max-age=1800" }),
+	cache({ cacheName: "brand-prices-v6", cacheControl: "public, max-age=1800" }),
 	async (c) => {
 		try {
 			const res = await fetch("https://api.chnwt.dev/thai-oil-api/latest");
@@ -186,7 +186,11 @@ app.get(
 					}
 				}
 
-				const dieselPrice = fuels.diesel_b7 || fuels.diesel || fuels.hi_diesel || fuels.diesel_s || null;
+				// thai-oil-api has diesel_b7 and premium_diesel fields swapped
+			// Use the LOWEST diesel price as regular B7 (regular is always cheaper)
+			const dieselCandidates = [fuels.diesel_b7, fuels.diesel, fuels.hi_diesel, fuels.diesel_s, fuels.hi_premium_diesel, fuels.premium_diesel]
+				.filter((v): v is number => v != null && v > 0);
+			const dieselPrice = dieselCandidates.length > 0 ? Math.min(...dieselCandidates) : null;
 
 				brands.push({
 					id: brandId,

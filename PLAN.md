@@ -1,6 +1,6 @@
 # FUEL::TH v3 -- Master Plan
 
-**Live:** https://fuel.lanta.dev\
+**Live:** https://www.fuelthai.com\
 **Staging:** https://fuel-staging.lanta.dev\
 **Branch:** `v3-staging` (merge to `main` when ready)\
 **Started:** March 24, 2026 -- built during the Iran war energy crisis\

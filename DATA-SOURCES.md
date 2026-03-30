@@ -120,4 +120,4 @@ This application aggregates publicly available data from third-party APIs. It is
 
 ---
 
-*Built during the 2026 Iran war energy crisis. Deployed at [fuel.lanta.dev](https://fuel.lanta.dev).*
+*Built during the 2026 Iran war energy crisis. Deployed at [www.fuelthai.com](https://www.fuelthai.com).*
